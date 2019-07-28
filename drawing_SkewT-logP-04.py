@@ -12,6 +12,8 @@ Beyond just plotting data, this uses calculations from `metpy.calc` to find the 
 condensation level (LCL) and the profile of a surface-based parcel. The area between the
 ambient profile and the parcel profile is colored as well.
 
+conda install -c conda-forge metpy
+
 conda install xarray=0.12.1
 
 #https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
@@ -96,7 +98,7 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
         date1 = date1 + relativedelta(hours=12)
     
     #%%
-    for selected_time in selected_times[0:1] :
+    for selected_time in selected_times:
         print(selected_time)
         
         try : 
@@ -107,6 +109,9 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             #df_selected_time = df_selected_time.dropna()
             df_selected_time = df_selected_time.sort_values('pressure', ascending=False)
             print(df_selected_time)
+            
+            
+            #potential_T = mpcalc.potential_temperature(p[10], T[10])
             
             df_selected_time.to_csv(r'{0}{1}{2}_{3}.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]))
             ###########################################
@@ -123,53 +128,89 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             ###########################################
             # Create a new figure. The dimensions here give a good aspect ratio.
             
-            fig = plt.figure(figsize=(10, 15))
+            fig = plt.figure(figsize=(12, 16))          
             #add_metpy_logo(fig, 115, 100)
             skew = SkewT(fig, rotation=45)
             
+            skew.ax.set_title('skew T log p diagram\n', fontsize=20)            
+            skew.ax.set_xlabel(r'temperature ($ \degree C$)', fontsize=16)
+            skew.ax.set_ylabel(r'pressure ($ hPa $)', fontsize=16)
+            
+
             # Plot the data using normal plotting functions, in this case using
             # log scaling in Y, as dictated by the typical meteorological plot
             skew.plot(p, T, 'r')
-            skew.plot(p, T, 'ro', markersize=8, fillstyle='none')
+            skew.plot(p, T, 'ro', markersize = 8, fillstyle='none', label='temperature')
             skew.plot(p, Td, 'g', linestyle='--')
-            skew.plot(p, Td, 'g^', markersize=8, fillstyle='none')
+            skew.plot(p, Td, 'g^', markersize = 8, fillstyle='none', label='dew point temperature')
             
-            skew.plot_barbs(p, u, v)
+            #skew.plot_barbs(p, u, v)
             skew.ax.set_ylim(1050, 100)
             skew.ax.set_xlim(-50, 60)
             
-            # Calculate LCL height and plot as black dot
-            lcl_pressure, lcl_temperature = mpcalc.lcl(p[0], T[0], Td[0])
-            skew.plot(lcl_pressure, lcl_temperature, 'ko', markerfacecolor='black')
+            # Calculate RH
+            RH = mpcalc.relative_humidity_from_dewpoint(T[0], Td[0])
             
-            plt.text(10, 1400, 'pressure of the LCL : {0:.0f}'.format(lcl_pressure), horizontalalignment='left', verticalalignment='center', fontsize=12)
-            plt.text(13.3, 1500, 'temerature of the LCL : {0:.0f}'.format(lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-        
+            # Calculate potential temperature
+            potential_T = mpcalc.potential_temperature(p[1], T[10])
+            
             # Calculate full parcel profile and add to plot as black line
-            prof = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
-            skew.plot(p, prof, 'k', linewidth=2)
+            prof_0 = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
+            skew.plot(p, prof_0, 'k', linewidth=1.5)
             
             # Shade areas of CAPE and CIN
-            skew.shade_cin(p, T, prof)
-            skew.shade_cape(p, T, prof)
+            skew.shade_cin(p, T, prof_0)
+            skew.shade_cape(p, T, prof_0)
             
+            #prof = mpcalc.parcel_profile(p, T, Td).to('degC')
+            #skew.plot(p, prof, 'b', linewidth=1.5)
+
+            # Calculate LCL height and plot as black dot
+            lcl_pressure, lcl_temperature = mpcalc.lcl(p[0], T[0], Td[0])
+            skew.plot(lcl_pressure, lcl_temperature, 'ko', markersize = 8, fillstyle='none', label='LCL')
+            
+            # Calculate EL height and plot as blue dot
+            EL_pressure, EL_temperature = mpcalc.el(p, T, Td, prof_0)
+            skew.plot(EL_pressure, EL_temperature, 'bo', markersize = 8, fillstyle='none', label='EL')
+            
+            # Calculate LCF height and plot as purple dot
+            LCF_pressure, LCF_temperature = mpcalc.lfc(p, T, Td, prof_0)
+            skew.plot(LCF_pressure, LCF_temperature, 'rx', markersize = 8, fillstyle='none', label='LCF')
+            
+            # Calculate most_unstable_parcel
+            mup_pressure, mup_temperature, mup_dewTemperature, mup_index = mpcalc.most_unstable_parcel(p, T, Td, heights=None, bottom=None, depth=50 * units.hPa)
+            skew.plot(p[mup_index-1:mup_index+1], Td[mup_index-1:mup_index+1], 'b', label='the most unstable parcel')
+            skew.plot(p[mup_index-1:mup_index+1], T[mup_index-1:mup_index+1], 'b')
+            #skew.plot(p[mup_index-1:mup_index+1], 'b', label='the most unstable parcel')
+                        
             # An example of a slanted line at constant T -- in this case the 0
             # isotherm
             skew.ax.axvline(0, color='c', linestyle='-', linewidth=1)
             for i in range(23) :
-                for j in range(2,9,2) :
+                for j in range(2,11,2) :
                     skew.ax.axvline(i*10-160+j, color='c', linestyle='--', linewidth=0.3)
                     #print (i*10-40+j)
             
             # Add the relevant special lines
             skew.plot_dry_adiabats(color='green', linestyle='-')
-            #skew.plot_dry_adiabats([1, 2], color='green', linestyle='-', linewidth=1)
             skew.plot_moist_adiabats(color='brown', linestyle='-')
             skew.plot_mixing_lines(color='blue', linestyle='--', linewidth=0.3)
             
-            plt.title('skew T log p diagram', fontsize=22)
+            plt.text(-160, 96, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+            plt.text(-76, 96, '$ \cdotp $ {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+            plt.text(10, 1250, '$ \cdotp $ {0}'.format(filename), horizontalalignment='left', verticalalignment='center', fontsize=12)
             
-            fig.savefig('{0}{1}{2}_{3}.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
+            plt.text(-40, 1250, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
+            plt.text(-38.15, 1300, '$ \cdotp $ LCF (   ): {0:.1f}, {1:.1f}'.format(LCF_pressure, LCF_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
+            plt.text(-36.30, 1350, '$ \cdotp $ EL   (   ): {0:.1f}, {1:.1f}'.format(EL_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
+            plt.text(-33, 1250, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
+            plt.text(-31.15, 1300, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
+            plt.text(-29.30, 1350, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
+            
+            
+            plt.legend()
+            
+            plt.savefig('{0}{1}{2}_{3}.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
                 dpi=None, facecolor='w', edgecolor='w',
                 orientation='portrait', papertype=None, format=None,
                 transparent=False, bbox_inches=None, pad_inches=0.1,

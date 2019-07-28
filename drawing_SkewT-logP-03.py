@@ -65,7 +65,7 @@ else :
 filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
 
 #%%
-for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
+for fullname in sorted(glob(os.path.join(dir_name, '*.csv')))[0:1]:
     fullname_el = fullname.split('\\')
     filename = fullname_el[-1]
     filename_el = filename.split('_')
