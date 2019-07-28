@@ -17,7 +17,7 @@ conda install xarray=0.12.1
 #https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
 
 """
-#%%
+
 import matplotlib.pyplot as plt
 from glob import glob
 import os
@@ -31,7 +31,6 @@ import metpy.calc as mpcalc
 from metpy.plots import SkewT
 from metpy.units import units
 
-#import shutil
 #%%
 add_log = True
 if add_log == True :
@@ -52,7 +51,7 @@ def print_working_time():
 ###########################################
 # Upper air data can be obtained using the siphon package, but for this example we will use
 # some of MetPy's sample data.
-dir_name = '47138/'
+dir_name = '../rawin_data/47138/'
 save_dir_name = 'skew_T-log_P-diagram/'
 
 if not os.path.exists(dir_name+save_dir_name):
@@ -65,6 +64,7 @@ else :
     
 filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
 
+#%%
 for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
     fullname_el = fullname.split('\\')
     filename = fullname_el[-1]
@@ -108,7 +108,7 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             df_selected_time = df_selected_time.sort_values('pressure', ascending=False)
             print(df_selected_time)
             
-            df_selected_time.to_csv(r'{0}{1}{2}_{3}.csv'.format(dir_name, save_dir_name, dir_name[:-1], selected_time[:13]))
+            df_selected_time.to_csv(r'{0}{1}{2}_{3}.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]))
             ###########################################
             # We will pull the data out of the example dataset into individual variables and
             # assign units.
@@ -130,7 +130,10 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             # Plot the data using normal plotting functions, in this case using
             # log scaling in Y, as dictated by the typical meteorological plot
             skew.plot(p, T, 'r')
-            skew.plot(p, Td, 'g')
+            skew.plot(p, T, 'ro', markersize=8, fillstyle='none')
+            skew.plot(p, Td, 'g', linestyle='--')
+            skew.plot(p, Td, 'g^', markersize=8, fillstyle='none')
+            
             skew.plot_barbs(p, u, v)
             skew.ax.set_ylim(1050, 100)
             skew.ax.set_xlim(-50, 60)
@@ -139,6 +142,9 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             lcl_pressure, lcl_temperature = mpcalc.lcl(p[0], T[0], Td[0])
             skew.plot(lcl_pressure, lcl_temperature, 'ko', markerfacecolor='black')
             
+            plt.text(10, 1400, 'pressure of the LCL : {0:.0f}'.format(lcl_pressure), horizontalalignment='left', verticalalignment='center', fontsize=12)
+            plt.text(13.3, 1500, 'temerature of the LCL : {0:.0f}'.format(lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
+        
             # Calculate full parcel profile and add to plot as black line
             prof = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
             skew.plot(p, prof, 'k', linewidth=2)
@@ -161,7 +167,7 @@ for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
             skew.plot_moist_adiabats(color='brown', linestyle='-')
             skew.plot_mixing_lines(color='blue', linestyle='--', linewidth=0.3)
             
-            fig.savefig('{0}{1}{2}_{3}.png'.format(dir_name, save_dir_name, dir_name[:-1], selected_time[:13]),
+            fig.savefig('{0}{1}{2}_{3}.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
                 dpi=None, facecolor='w', edgecolor='w',
                 orientation='portrait', papertype=None, format=None,
                 transparent=False, bbox_inches=None, pad_inches=0.1,
