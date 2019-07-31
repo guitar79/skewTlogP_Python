@@ -28,8 +28,6 @@ import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import metpy.calc as mpcalc
-#from metpy.cbook import get_test_data
-#from metpy.plots import add_metpy_logo, SkewT
 from metpy.plots import SkewT
 from metpy.units import units
 
@@ -51,12 +49,11 @@ def print_working_time():
 
 #%%
 ###########################################
-# Upper air data can be obtained using the siphon package, but for this example we will use
-# some of MetPy's sample data.
+
 dir_name = '../rawin_data/47138/'
 
-dir_names = ['../rawin_data/47138/', '../rawin_data/47122/', '../rawin_data/47158/']
-for dir_name in dir_names[0:1]:
+dir_names = ['../rawin_data/47090/', '../rawin_data/47102/', '../rawin_data/47104/', '../rawin_data/47155/', '../rawin_data/47158/', '../rawin_data/47185/', '../rawin_data/47186/']
+for dir_name in dir_names:
 
     save_dir_name = 'skew_T-log_P-diagram/'
     
@@ -70,8 +67,7 @@ for dir_name in dir_names[0:1]:
         
     filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
     
-    #%%
-    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))) :
+    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
         fullname_el = fullname.split('\\')
         filename = fullname_el[-1]
         filename_el = filename.split('_')
@@ -84,15 +80,14 @@ for dir_name in dir_names[0:1]:
         
         df['u_wind'], df['v_wind'] = mpcalc.wind_components(df['speed'],
                                                             np.deg2rad(df['direction']))
-        #%%
-        # Drop any rows with all NaN values for T, Td, winds
-        #df = df.dropna(subset=('temperature', 'dewpoint', 'direction', 'speed', 'u_wind', 'v_wind'), how='all').reset_index(drop=True)
-        df = df.dropna(subset=('temperature', 'dewpoint'), how='all').reset_index(drop=True)
         
-        #%%
+        # Drop any rows with all NaN values for T, Td, winds
+        df = df.dropna(subset=('temperature', 'dewpoint'), how='all').reset_index(drop=True)
+        #df = df.dropna(subset=('temperature', 'dewpoint', 'height'), how='all').reset_index(drop=True)
+
         # Rows that do not meet the condition alpha + num are eliminated
         s_start_date = datetime(obs_year, 1, 1) #convert startdate to date type
-        s_end_date = datetime(obs_year, 12, 31)
+        s_end_date = datetime(obs_year+1, 1, 1)
         
         date1 = s_start_date
         selected_times = []
@@ -101,8 +96,7 @@ for dir_name in dir_names[0:1]:
             selected_times.append(date1_strf)
             date1 = date1 + relativedelta(hours=12)
         
-        #%%
-        for selected_time in selected_times :
+        for selected_time in selected_times:
             print(selected_time)
             
             try : 
@@ -138,13 +132,13 @@ for dir_name in dir_names[0:1]:
                 df_selected_time.to_csv(r'{0}{1}{2}_{3}_solution.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]))
                 
                 # Create a new figure. The dimensions here give a good aspect ratio.
-                fig = plt.figure(figsize=(12, 16))          
+                fig = plt.figure(figsize=(15, 20))          
                 #add_metpy_logo(fig, 115, 100)
                 skew = SkewT(fig, rotation=45)
                 
-                skew.ax.set_title('skew T log p diagram\n', fontsize=20)            
-                skew.ax.set_xlabel('\ntemperature ($ \degree C$)', fontsize=16)
-                skew.ax.set_ylabel(r'pressure ($ hPa $)', fontsize=16)
+                skew.ax.set_title('skew T log p diagram\n', fontsize=24)            
+                skew.ax.set_xlabel(r'temperature ($ \degree C$)', fontsize=18)
+                skew.ax.set_ylabel(r'pressure ($ hPa $)', fontsize=18)
                 
     
                 # Plot the data using normal plotting functions, in this case using
@@ -153,10 +147,12 @@ for dir_name in dir_names[0:1]:
                 skew.plot(p, T, 'ro', markersize = 8, fillstyle='none', label='temperature')
                 skew.plot(p, Td, 'g', linestyle='--')
                 skew.plot(p, Td, 'g^', markersize = 8, fillstyle='none', label='dew point temperature')
+                skew.plot_barbs(p, u, v)
                 
-                #skew.plot_barbs(p, u, v)
                 skew.ax.set_ylim(1050, 100)
                 skew.ax.set_xlim(-50, 60)
+                skew.ax.tick_params(axis="x", labelsize=14, pad=10, rotation=45, labelcolor='orange')
+                skew.ax.tick_params(axis="y", labelsize=14, pad=0.5)
                 
                 # Calculate full parcel profile and add to plot as black line
                 prof_0 = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
@@ -190,60 +186,63 @@ for dir_name in dir_names[0:1]:
                 
                 # Calculate most_unstable_parcel
                 mup_pressure, mup_temperature, mup_dewTemperature, mup_index = mpcalc.most_unstable_parcel(p, T, Td, heights=prof_0, bottom=1050 * units.hPa, depth=650 * units.hPa)
-                #skew.plot(p[mup_index-1:mup_index+1], Td[mup_index-1:mup_index+1], 'b')
                 skew.plot(p[mup_index-1:mup_index+1], T[mup_index-1:mup_index+1], 'b', label='the most unstable level')
                 #skew.plot(p[mup_index-1:mup_index+1], 'b', label='the most unstable parcel')
                             
                 # An example of a slanted line at constant T -- in this case the 0
                 # isotherm
-                skew.ax.axvline(0, color='c', linestyle='-', linewidth=1)
+                skew.ax.axvline(0, color='orange', linestyle='-', linewidth=1, label='isothermal')
                 for i in range(23) :
                     for j in range(2,11,2) :
-                        skew.ax.axvline(i*10-160+j, color='c', linestyle='--', linewidth=0.3)
-                        #print (i*10-40+j)
-                
+                        skew.ax.axvline(i*10-160+j, color='orange', linestyle='-', linewidth=0.3)
+                    skew.ax.axvline(i*10-160, color='orange', linestyle='-', linewidth=1)
+            
                 # Add the relevant special lines
-                skew.plot_dry_adiabats(t0=np.arange(-50, 60, 2) * units.degC, color='green', linestyle='-', linewidth=0.3)
-                skew.plot_dry_adiabats(color='green', linestyle='-', linewidth=1.5, label='dry adiabats')
-                skew.plot_moist_adiabats(t0=np.arange(-50, 60, 2) * units.degC, color='brown', linestyle='-', linewidth=0.3)
-                skew.plot_moist_adiabats(color='brown', linestyle='-', linewidth=1.5, label='saturated adiabats')            
+                skew.plot_dry_adiabats(t0=np.arange(-50, 160, 2) * units.degC, color='green', linestyle='-', linewidth=0.3)
+                skew.plot_dry_adiabats(t0=np.arange(-50, 160, 10) * units.degC, color='green', linestyle='-', linewidth=1.5, label='dry adiabat')
+                skew.plot_moist_adiabats(t0=np.arange(-50, 160, 2) * units.degC, color='brown', linestyle='-', linewidth=0.3)
+                skew.plot_moist_adiabats(t0=np.arange(-50, 160, 10) * units.degC, color='brown', linestyle='-', linewidth=1.5, label='saturation adiabat')
                 mixing_ratio_ticks = np.array([0.0001, 0.0005, 0.001, 0.015, 0.002, 0.003, 0.005, 0.007, 0.010, 0.015, 0.020, 0.030, 0.040, 0.050]).reshape(-1, 1)
                 skew.plot_mixing_lines(w=mixing_ratio_ticks, color='blue', linestyle='--', linewidth=1.0, label='mixing ratio')
                 
-                #0.0001, 0.0005, 0.001, 0.015, 0.002, 0.003, 0.005, 0.007, 0.010, 0.015, 0.020, 0.030, 0.040, 0.050
-                plt.text(-50, 1120, 'mixing ratio', horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(-40, 1120, '{0}'.format(mixing_ratio_ticks[0][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(-24.5, 1120, '{0}'.format(mixing_ratio_ticks[1][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(-16, 1120, '{0}'.format(mixing_ratio_ticks[2][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(-7.5, 1120, '{0}'.format(mixing_ratio_ticks[3][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(-1.7, 1120, '{0}'.format(mixing_ratio_ticks[4][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(5, 1120, '{0}'.format(mixing_ratio_ticks[5][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(10, 1120, '{0}'.format(mixing_ratio_ticks[6][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(15.5, 1120, '{0}'.format(mixing_ratio_ticks[7][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(22, 1120, '{0}'.format(mixing_ratio_ticks[8][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(27, 1120, '{0}'.format(mixing_ratio_ticks[9][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(33, 1120, '{0}'.format(mixing_ratio_ticks[10][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(38, 1120, '{0}'.format(mixing_ratio_ticks[11][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                plt.text(42, 1120, '{0}'.format(mixing_ratio_ticks[12][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                
-                plt.text(-160, 96, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
-                plt.text(-76, 96, '$ \cdotp $ {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                #0.0001, 0.0005, 0.001, 0.015, 0.002, 0.003, 0.005, 0.007, 0.010, 0.015, 0.020, 0.030, 0.040, 0.050        
+                plt.text(-55.5, 1071, 'saturation mixing ratio', horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(-41.5, 1071, '{0}'.format(mixing_ratio_ticks[0][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(-26, 1071, '{0}'.format(mixing_ratio_ticks[1][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(-17.5, 1071, '{0}'.format(mixing_ratio_ticks[2][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(-8.7, 1071, '{0}'.format(mixing_ratio_ticks[3][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(-3.2, 1071, '{0}'.format(mixing_ratio_ticks[4][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(3.5, 1071, '{0}'.format(mixing_ratio_ticks[5][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(8.5, 1071, '{0}'.format(mixing_ratio_ticks[6][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(13.5, 1071, '{0}'.format(mixing_ratio_ticks[7][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(20.2, 1071, '{0}'.format(mixing_ratio_ticks[8][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(24.7, 1071, '{0}'.format(mixing_ratio_ticks[9][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(32, 1071, '{0}'.format(mixing_ratio_ticks[10][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(36.8, 1071, '{0}'.format(mixing_ratio_ticks[11][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                plt.text(40.8, 1071, '{0}'.format(mixing_ratio_ticks[12][0]), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+        
+                plt.text(-162.5, 93.5, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                plt.text(-160.70, 97, '$ \cdotp $ time : {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
                 
                 plt.text(-40, 1280, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                 plt.text(-38.15, 1330, '$ \cdotp $ LCF (   ): {0:.1f}, {1:.1f}'.format(LCF_pressure, LCF_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                 plt.text(-36.30, 1380, '$ \cdotp $ EL   (   ): {0:.1f}, {1:.1f}'.format(EL_pressure, EL_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                plt.text(-33, 1280, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
-                plt.text(-31.15, 1330, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
-                plt.text(-29.30, 1380, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
+                plt.text(-34.5, 1280, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
+                plt.text(-32.65, 1330, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
+                plt.text(-30.80, 1380, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
                 
                 plt.text(30, 1280, '$ \cdotp $ the most unstable parcel index: {0}'.format(mup_index), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                plt.text(31.85, 1330, '   {0:.1f} ~ {1:.1f}'.format(p[mup_index-1], p[mup_index]), horizontalalignment='left', verticalalignment='center', fontsize=12)
+                plt.text(31.85, 1330, '     {0:.1f} ~ {1:.1f}'.format(p[mup_index-1], p[mup_index]), horizontalalignment='left', verticalalignment='center', fontsize=12)
                 plt.text(33.70, 1380, '$ \cdotp $ {0}'.format(filename), horizontalalignment='left', verticalalignment='center', fontsize=12)
                 
-                
-                plt.legend()
+                plt.legend(loc='upper right')
                 
                 plt.savefig('{0}{1}{2}_{3}_solution.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
+                    dpi=None, facecolor='w', edgecolor='w',
+                    orientation='portrait', papertype=None, format=None,
+                    transparent=False, bbox_inches=None, pad_inches=0.1,
+                    frameon=None, metadata=None)
+                plt.savefig('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
                     dpi=None, facecolor='w', edgecolor='w',
                     orientation='portrait', papertype=None, format=None,
                     transparent=False, bbox_inches=None, pad_inches=0.1,
