@@ -63,7 +63,8 @@ for dir_name in dir_names:
     
     #%%
     for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
-        fullname_el = fullname.split('/')
+        #fullname_el = fullname.split('/')
+        fullname_el = fullname.split('\\')
         filename = fullname_el[-1]
         filename_el = filename.split('_')
         obs_year = int(filename_el[-3])
