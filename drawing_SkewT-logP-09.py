@@ -57,12 +57,12 @@ dir_name = '../47138/'
 
 dir_names = ['../47090/', '../47012/', '../47104/', '../47122/', '../47138/', '../47155/', '../47158/', '../47169/', '../47185/', '../47186/']
 
-for dir_name in dir_names:
+for dir_name in dir_names[-2:-1]:
         
     filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
     
     #%%
-    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
+    for fullname in sorted(glob(os.path.join(dir_name, '*.csv')))[-2:-1]:
         #fullname_el = fullname.split('/')
         fullname_el = fullname.split('\\')
         filename = fullname_el[-1]
@@ -103,11 +103,11 @@ for dir_name in dir_names:
             selected_times.append(date1_strf)
             date1 = date1 + relativedelta(hours=12)
         
-        for selected_time in selected_times:
+        for selected_time in selected_times[-20:-1]:
             print('site : {0}'.format(dir_name))
             print('selected_time.\n {0}'.format(selected_time))
             
-            if not os.path.isfile('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
+            if os.path.isfile('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
             and os.path.isfile('{0}{1}{2}_{3}_solution.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
             and os.path.isfile('{0}{1}{2}_{3}_student.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) :
                 write_log(log_file, '{4} ::: {0}{1}{2}_{3}_solution files are already exist'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
