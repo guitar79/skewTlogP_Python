@@ -53,11 +53,15 @@ file_name = 'UPPER_SONDE_47090_ALL_2011_2011_2015.csv'
 file_name_el = file_name.split('_')
 
 #지점,일시(UTC),기압(hPa),고도(gpm),기온(°C),이슬점온도(°C),풍향(deg),풍속(knot),지상 FLAG(null),권계면 FLAG(null),최대풍 FLAG(null)
-#df_new = pd.read_csv(dir_name+file_name, skiprows=1, sep=',', header=None, index_col=0,
-#                 names = ['site', 'time', 'pressure', 'height', 'temperature', 'dewpoint', 'direction', 'speed', 'FLAG1', 'FLAG2', 'FLAG3'],
-#                 skipfooter=1, engine='python')
+df = pd.read_csv(dir_name+file_name, skiprows=1, sep=',', header=None, index_col=0,
+                 names = ['site', 'time', 'pressure', 'height', 'temperature', 'dewpoint', 'direction', 'speed', 'FLAG1', 'FLAG2', 'FLAG3'],
+                 skipfooter=1, engine='python')
 
-f = open(dir_name+file_name, 'r', encoding = 'unicode_escape')
+df.drop_duplicates(keep = 'first', inplace = True) 
+
+df.to_csv(r'{0}.csv'.format(file_name[:-4]))
+
+f = open('{0}.csv'.format(file_name[:-4]), 'r', encoding = 'unicode_escape')
 f = f.read()
 rows = f.split("\n")
 #%%
@@ -69,7 +73,8 @@ tt = ' 00:00'
 #for i in range(df_new.size) : 
 for row in rows : 
     d = row.split(",")
-    if 'hPa' in d[2] :
+    #if 'hPa' in d[2] :
+    if 'pressure' in d[2] :
         continue
     elif previous_p > float(d[2]):
         if tt == ' 00:00' : tt = ' 06:00'
@@ -84,7 +89,8 @@ for row in rows :
     print(d[1] + tt, previous_p, d[2])
 
     previous_p = float(d[2])
-with open("{0}.txt".format(file_name[:-3]), "w") as text_file:
+#%%
+with open("{0}.csv".format(file_name[:-4]), "w") as text_file:
     text_file.write(new_data)
         
         

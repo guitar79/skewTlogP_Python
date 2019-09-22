@@ -53,29 +53,30 @@ def print_working_time():
 ###########################################
 # Upper air data can be obtained using the siphon package, but for this example we will use
 # some of MetPy's sample data.
-dir_name = '../rawin_data/47138/'
+dir_name = '../47138/'
 
-dir_names = ['../rawin_data/47138/', '../rawin_data/47122/', '../rawin_data/47158/']
-for dir_name in dir_names[1:2]:
+dir_names = ['../47090/', '../47012/', '../47104/', '../47122/', '../47138/', '../47155/', '../47158/', '../47169/', '../47185/', '../47186/']
 
-    save_dir_name = 'skew_T-log_P-diagram/'
-    
-    if not os.path.exists(dir_name+save_dir_name):
-        os.makedirs(dir_name+save_dir_name)
-        print ('*'*80)
-        print (dir_name+save_dir_name, 'is created')
-    else :
-        print ('*'*80)
-        print (dir_name+save_dir_name, 'is exist')
+for dir_name in dir_names:
         
     filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
     
     #%%
-    for fullname in sorted(glob(os.path.join(dir_name, '*.csv')))[3:4]:
-        fullname_el = fullname.split('\\')
+    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
+        fullname_el = fullname.split('/')
         filename = fullname_el[-1]
         filename_el = filename.split('_')
         obs_year = int(filename_el[-3])
+        
+        save_dir_name = 'skew_T-log_P-diagram_{0}/'.format(obs_year)
+    
+        if not os.path.exists(dir_name+save_dir_name):
+            os.makedirs(dir_name+save_dir_name)
+            print ('*'*80)
+            print (dir_name+save_dir_name, 'is created')
+        else :
+            print ('*'*80)
+            print (dir_name+save_dir_name, 'is exist')
     
         #지점,일시(UTC),기압(hPa),고도(gpm),기온(°C),이슬점온도(°C),풍향(deg),풍속(knot),지상 FLAG(null),권계면 FLAG(null),최대풍 FLAG(null)
         df = pd.read_csv(dir_name+filename, skiprows=1, sep=',', header=None, index_col=0,
@@ -101,7 +102,7 @@ for dir_name in dir_names[1:2]:
             selected_times.append(date1_strf)
             date1 = date1 + relativedelta(hours=12)
         
-        for selected_time in selected_times[100:102]:
+        for selected_time in selected_times:
             print(selected_time)
             
             #try : 
