@@ -57,19 +57,19 @@ dir_name = '../47138/'
 
 dir_names = ['../47090/', '../47012/', '../47104/', '../47122/', '../47138/', '../47155/', '../47158/', '../47169/', '../47185/', '../47186/']
 
-for dir_name in dir_names:
+for dir_name in dir_names[-2:-1]:
         
     filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
     
     #%%
-    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
+    for fullname in sorted(glob(os.path.join(dir_name, '*.csv')))[-2:-1]:
         #fullname_el = fullname.split('/')
         fullname_el = fullname.split('\\')
         filename = fullname_el[-1]
         filename_el = filename.split('_')
         obs_year = int(filename_el[-3])
         
-        save_dir_name = 'skew_T-log_P-diagram_{0}/'.format(obs_year)
+        save_dir_name = 'skew_T-log_P-diagram1_{0}/'.format(obs_year)
     
         if not os.path.exists(dir_name+save_dir_name):
             os.makedirs(dir_name+save_dir_name)
@@ -103,7 +103,7 @@ for dir_name in dir_names:
             selected_times.append(date1_strf)
             date1 = date1 + relativedelta(hours=12)
         
-        for selected_time in selected_times:
+        for selected_time in selected_times[-20:-1]:
             print('site : {0}'.format(dir_name))
             print('selected_time.\n {0}'.format(selected_time))
             
@@ -132,21 +132,41 @@ for dir_name in dir_names:
                     wind_speed = df_selected_time['speed'].values * units.knots
                     wind_dir = df_selected_time['direction'].values * units.degrees
                     u, v = mpcalc.wind_components(wind_speed, wind_dir)
-        
-                    # Calculate RH
-                    #RH = mpcalc.relative_humidity_from_dewpoint(T[0], Td[0])
-                    df_selected_time['RH'] = mpcalc.relative_humidity_from_dewpoint(T, Td)
-                    
+                                        
                     # Calculate potential temperature
                     #potential_T = mpcalc.potential_temperature(p[1], T[10])
                     df_selected_time['potential_T'] = mpcalc.potential_temperature(p, T)
+                    df_selected_time['potential_T_C'] = df_selected_time['potential_T'].values - 273.15
+                    
+                    df_selected_time['saturation_vaper_pressure'] = mpcalc.saturation_vapor_pressure(T)
+                    df_selected_time['vaper_pressure']  = mpcalc.saturation_vapor_pressure(Td)
+                    VPS = df_selected_time['saturation_vaper_pressure'].values * units.hPa
+                    VP = df_selected_time['vaper_pressure'].values * units.hPa
+                    
+                    df_selected_time['saturation_mixing_ratio'] = mpcalc.mixing_ratio(VPS, p)
+                    df_selected_time['mixing_ratio'] = mpcalc.mixing_ratio(VP, p)
+                    MRS = df_selected_time['saturation_mixing_ratio'].values * units('g/kg')
+                    MR = df_selected_time['mixing_ratio'].values * units('g/kg')
+                    
+                    # Calculate RH
+                    #RH = mpcalc.relative_humidity_from_dewpoint(T[0], Td[0])
+                    df_selected_time['RH'] = mpcalc.relative_humidity_from_dewpoint(T, Td)
+                    df_selected_time['RH_MR'] = mpcalc.relative_humidity_from_mixing_ratio(MR, T, p) 
+                                        
                     print('df_selected_time after drop nan.\n{0}'.format(df_selected_time))
                                     
                     df_selected_time.to_csv(r'{0}{1}{2}_{3}_solution.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]))
                     
+                    p = df_selected_time['pressure'].values * units.hPa
+                    T = df_selected_time['temperature'].values * units.degC
+                    Td = df_selected_time['dewpoint'].values * units.degC
+                    wind_speed = df_selected_time['speed'].values * units.knots
+                    wind_dir = df_selected_time['direction'].values * units.degrees
+                    u, v = mpcalc.wind_components(wind_speed, wind_dir)
+                    
                     ###########################################
                     # Create a new figure. The dimensions here give a good aspect ratio.
-                    fig = plt.figure(figsize=(12, 16))          
+                    fig = plt.figure(figsize=(18, 24))          
                     #add_metpy_logo(fig, 115, 100)
                     skew = SkewT(fig, rotation=45)
                     
@@ -242,9 +262,9 @@ for dir_name in dir_names:
                     plt.text(-40, 1310, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     plt.text(-38.15, 1360, '$ \cdotp $ LCF (   ): {0:.1f}, {1:.1f}'.format(LCF_pressure, LCF_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     plt.text(-36.30, 1410, '$ \cdotp $ EL   (   ): {0:.1f}, {1:.1f}'.format(EL_pressure, EL_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    plt.text(-33.0, 1310, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
-                    plt.text(-31.15, 1360, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
-                    plt.text(-29.30, 1410, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
+                    plt.text(-35.5, 1310, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
+                    plt.text(-33.65, 1360, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
+                    plt.text(-31.80, 1410, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
                     #plt.text(30, 1310, '$ \cdotp $ the most unstable parcel index: {0}'.format(mup_index), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     #plt.text(31.85, 1360, '     {0:.1f} ~ {1:.1f}'.format(p[mup_index-1], p[mup_index]), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     plt.text(25.70, 1410, '$ \cdotp $ {0}'.format(filename), horizontalalignment='left', verticalalignment='center', fontsize=12)
