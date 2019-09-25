@@ -60,8 +60,9 @@ dir_names = ['../47090/', '../47102/', '../47104/', '../47122/', '../47138/', '.
 #dir_names = ['../47104/', '../47122/', '../47138/']
 #dir_names = ['../47155/', '../47158/', '../47169/']
 #dir_names = ['../47185/', '../47186/']
-xxlim = [-20, 40]
+xxlim = [-30, 30]
 yylim = [1050, 400]
+
 for dir_name in dir_names:
         
     filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
@@ -234,10 +235,10 @@ for dir_name in dir_names:
                         skew.ax.axvline(i*5-160, color='brown', linestyle='-', linewidth=1)
                 
                     # Add the relevant special lines
-                    skew.plot_dry_adiabats(t0=np.arange(-50, 260, 2) * units.degC, color='green', linestyle='-', linewidth=0.3)
-                    skew.plot_dry_adiabats(color='green', linestyle='-', linewidth=1.5, label='dry adiabat')
-                    skew.plot_moist_adiabats(t0=np.arange(-50, 160, 2) * units.degC, color='orange', linestyle='-', linewidth=0.3)
-                    skew.plot_moist_adiabats(color='orange', linestyle='-', linewidth=1.5, label='saturation adiabat')
+                    skew.plot_dry_adiabats(t0=np.arange(-50, 260, 2) * units.degC, color='orange', linestyle='-', linewidth=0.3)
+                    skew.plot_dry_adiabats(color='orange', linestyle='-', linewidth=1.5, label='dry adiabat')
+                    skew.plot_moist_adiabats(t0=np.arange(-50, 160, 2) * units.degC, color='green', linestyle='-', linewidth=0.3)
+                    skew.plot_moist_adiabats(color='green', linestyle='-', linewidth=1.5, label='saturation adiabat')
                     #mixing_ratio_ticks = np.array([0.0001, 0.0005, 0.001, 0.015, 0.002, 0.003, 0.005, 0.007, 0.010, 0.015, 0.020, 0.030, 0.040, 0.050]).reshape(-1, 1)
                     mixing_ratio_ticks = np.array([0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010, 0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.024, 0.026, 0.028, 0.030]).reshape(-1, 1)
                     skew.plot_mixing_lines(w=mixing_ratio_ticks, color='blue', linestyle='--', linewidth=1.0, label='mixing ratio')
@@ -267,32 +268,19 @@ for dir_name in dir_names:
                     plt.text(27.0, 1062, '{0:.0f}'.format(mixing_ratio_ticks[22][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(28.5, 1062, '{0:.0f}'.format(mixing_ratio_ticks[23][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     
-                    plt.text(-90.0, 393.5, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
-                    plt.text(-90.0, 397, '$ \cdotp $ time : {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                    plt.text(xxlim[0]-30, -12-60.0, yylim[1]-12, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                    plt.text(xxlim[0]-30, yylim[1]-5, '$ \cdotp $ time : {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
                     
                     #for ubuntu
                     plt.text(-17, 1130, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     plt.text(-16, 1150, '$ \cdotp $ LCF (   ): {0:.1f}, {1:.1f}'.format(LCF_pressure, LCF_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
                     plt.text(-15, 1170, '$ \cdotp $ EL   (   ): {0:.1f}, {1:.1f}'.format(EL_pressure, EL_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    plt.text(-14.8, 1130, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
-                    plt.text(-13.8, 1150, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
-                    plt.text(-12.8, 1170, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
-                    #plt.text(30, 1310, '$ \cdotp $ the most unstable parcel index: {0}'.format(mup_index), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(31.85, 1360, '     {0:.1f} ~ {1:.1f}'.format(p[mup_index-1], p[mup_index]), horizontalalignment='left', verticalalignment='center', fontsize=12)
+                    plt.text(-15.0, 1130, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
+                    plt.text(-14.0, 1150, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
+                    plt.text(-13.0, 1170, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
+                    
                     plt.text(10.70, 1170, '$ \cdotp $ {0}'.format(filename), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    
-                    #for windows
-                    #plt.text(-40, 1280, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(-38.15, 1330, '$ \cdotp $ LCF (   ): {0:.1f}, {1:.1f}'.format(LCF_pressure, LCF_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(-36.30, 1380, '$ \cdotp $ EL   (   ): {0:.1f}, {1:.1f}'.format(EL_pressure, EL_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(-34.5, 1280, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='black')
-                    #plt.text(-32.65, 1330, 'x', horizontalalignment='left', verticalalignment='center', fontsize=12, color='red')
-                    #plt.text(-30.80, 1380, 'o', horizontalalignment='left', verticalalignment='center', fontsize=12, color='blue')
-                    #plt.text(30, 1280, '$ \cdotp $ the most unstable parcel index: {0}'.format(mup_index), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(31.85, 1330, '     {0:.1f} ~ {1:.1f}'.format(p[mup_index-1], p[mup_index]), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    #plt.text(33.70, 1380, '$ \cdotp $ {0}'.format(filename), horizontalalignment='left', verticalalignment='center', fontsize=12)
-                    
-                    #plt.legend()
+                                        
                     plt.legend(loc='upper left')
                     
                     plt.savefig('{0}{1}{2}_{3}_solution.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
@@ -300,12 +288,13 @@ for dir_name in dir_names:
                         orientation='portrait', papertype=None, format=None,
                         transparent=False, bbox_inches=None, pad_inches=0.1,
                         frameon=None, metadata=None)
-                    plt.savefig('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
-                        dpi=None, facecolor='w', edgecolor='w',
-                        orientation='portrait', papertype=None, format=None,
-                        transparent=False, bbox_inches=None, pad_inches=0.1,
-                        frameon=None, metadata=None)
+                    #plt.savefig('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
+                    #    dpi=None, facecolor='w', edgecolor='w',
+                    #    orientation='portrait', papertype=None, format=None,
+                    #    transparent=False, bbox_inches=None, pad_inches=0.1,
+                    #    frameon=None, metadata=None)
                     write_log(log_file, '{4} ::: {0}{1}{2}_{3}_solution files are created'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
+
                     # Show the plot
                     #plt.show()
                     plt.close(fig)

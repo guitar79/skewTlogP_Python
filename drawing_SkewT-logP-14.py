@@ -60,7 +60,7 @@ dir_names = ['../47090/', '../47102/', '../47104/', '../47122/', '../47138/', '.
 #dir_names = ['../47104/', '../47122/', '../47138/']
 #dir_names = ['../47155/', '../47158/', '../47169/']
 #dir_names = ['../47185/', '../47186/']
-xxlim = [-20, 40]
+xxlim = [-30, 30]
 yylim = [1050, 400]
 for dir_name in dir_names:
         
@@ -242,10 +242,11 @@ for dir_name in dir_names:
                     mixing_ratio_ticks = np.array([0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010, 0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.024, 0.026, 0.028, 0.030, 0.033, 0.036, 0.040]).reshape(-1, 1)
                     skew.plot_mixing_lines(w=mixing_ratio_ticks, color='blue', linestyle='--', linewidth=1.0, label='mixing ratio')
                     
-                    plt.text(-21.0, 1062, 'mixing ratio', horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    #plt.text(-27.2, 1062, '{0}'.format(mixing_ratio_ticks[2][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    #plt.text(-22.5, 1062, '{0}'.format(mixing_ratio_ticks[3][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    #plt.text(-19, 1062, '{0}'.format(mixing_ratio_ticks[4][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                    #0.0001, 0.0005, 0.001, 0.015, 0.002, 0.003, 0.005, 0.007, 0.010, 0.015, 0.020, 0.030, 0.040, 0.050        
+                    plt.text(-31.0, 1062, 'mixing ratio', horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                    plt.text(-27.2, 1062, '{0}'.format(mixing_ratio_ticks[2][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                    plt.text(-22.5, 1062, '{0}'.format(mixing_ratio_ticks[3][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
+                    plt.text(-19, 1062, '{0}'.format(mixing_ratio_ticks[4][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(-16.5, 1062, '{0}'.format(mixing_ratio_ticks[5][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(-11.5, 1062, '{0}'.format(mixing_ratio_ticks[6][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(-8.2, 1062, '{0}'.format(mixing_ratio_ticks[7][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
@@ -265,15 +266,9 @@ for dir_name in dir_names:
                     plt.text(25.3, 1062, '{0:.0f}'.format(mixing_ratio_ticks[21][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(27.0, 1062, '{0:.0f}'.format(mixing_ratio_ticks[22][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     plt.text(28.5, 1062, '{0:.0f}'.format(mixing_ratio_ticks[23][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(29.7, 1062, '{0:.0f}'.format(mixing_ratio_ticks[24][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(31.1, 1062, '{0:.0f}'.format(mixing_ratio_ticks[25][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(32.2, 1062, '{0:.0f}'.format(mixing_ratio_ticks[26][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(33.8, 1062, '{0:.0f}'.format(mixing_ratio_ticks[27][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(35.3, 1062, '{0:.0f}'.format(mixing_ratio_ticks[28][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
-                    plt.text(37.2, 1062, '{0:.0f}'.format(mixing_ratio_ticks[29][0]*1000), horizontalalignment='left', verticalalignment='center', fontsize=9, color='blue')
                     
-                    plt.text(-50.0, 388.0, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
-                    plt.text(-50.0, 395.0, '$ \cdotp $ time : {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                    plt.text(xxlim[0]-30, yylim[1]-12, '$ \cdotp $ site : {0}'.format(filename_el[-5]), horizontalalignment='left', verticalalignment='center', fontsize=10)
+                    plt.text(xxlim[0]-30, yylim[1]-5, '$ \cdotp $ time : {0} (UTC)'.format(selected_time[:16]), horizontalalignment='left', verticalalignment='center', fontsize=10)
                     
                     #for ubuntu
                     plt.text(-17, 1130, '$ \cdotp $ LCL (   ): {0:.1f}, {1:.1f}'.format(lcl_pressure, lcl_temperature), horizontalalignment='left', verticalalignment='center', fontsize=12)
