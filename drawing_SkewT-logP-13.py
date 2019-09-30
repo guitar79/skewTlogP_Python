@@ -76,6 +76,14 @@ for dir_name in dir_names:
         
         save_dir_name = '../SkewT_LogP/{0}skew_T-log_P_{2}C_{3}C_{4}_{5}hPa_{1}/'.format(dir_name[3:],obs_year, xxlim[0], xxlim[1], yylim[0], yylim[1])
     
+        if not os.path.exists('../SkewT_LogP/{0}'.format(dir_name[3:])):
+            os.makedirs('../SkewT_LogP/{0}'.format(dir_name[3:]))
+            print ('*'*80)
+            print ('../SkewT_LogP/{0} is created'.format(dir_name[3:]))
+        else :
+            print ('*'*80)
+            print ('../SkewT_LogP/{0} is exist'.format(dir_name[3:]))
+            
         if not os.path.exists(dir_name+save_dir_name):
             os.makedirs(dir_name+save_dir_name)
             print ('*'*80)
@@ -112,9 +120,9 @@ for dir_name in dir_names:
             print('site : {0}'.format(dir_name))
             print('selected_time.\n {0}'.format(selected_time))
             
-            if os.path.isfile('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
-            and os.path.isfile('{0}{1}{2}_{3}_solution.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
-            and not os.path.isfile('{0}{1}{2}_{3}_student.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) :
+            if os.path.isfile('{0}{1}{2}_{3}_solution.png'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
+            and os.path.isfile('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) \
+            and os.path.isfile('{0}{1}{2}_{3}_student.csv'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13])) :
                 write_log(log_file, '{4} ::: {0}{1}{2}_{3}_solution files are already exist'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
             else : 
                 try : 
@@ -293,11 +301,11 @@ for dir_name in dir_names:
                         orientation='portrait', papertype=None, format=None,
                         transparent=False, bbox_inches=None, pad_inches=0.1,
                         frameon=None, metadata=None)
-                    #plt.savefig('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
-                        #dpi=None, facecolor='w', edgecolor='w',
-                        #orientation='portrait', papertype=None, format=None,
-                        #transparent=False, bbox_inches=None, pad_inches=0.1,
-                        #frameon=None, metadata=None)
+                    plt.savefig('{0}{1}{2}_{3}_solution.pdf'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13]),
+                        dpi=None, facecolor='w', edgecolor='w',
+                        orientation='portrait', papertype=None, format=None,
+                        transparent=False, bbox_inches=None, pad_inches=0.1,
+                        frameon=None, metadata=None)
                     write_log(log_file, '{4} ::: {0}{1}{2}_{3}_solution files are created'.format(dir_name, save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
                     # Show the plot
                     #plt.show()
