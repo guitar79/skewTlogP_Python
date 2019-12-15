@@ -2,8 +2,20 @@
 # Distributed under the terms of the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 """
+=================
+Advanced Sounding
+=================
+
+Plot a sounding using MetPy with more advanced features.
+
+Beyond just plotting data, this uses calculations from `metpy.calc` to find the lifted
+condensation level (LCL) and the profile of a surface-based parcel. The area between the
+ambient profile and the parcel profile is colored as well.
+
 conda install -c conda-forge metpy
-created by guitar79@naver.com
+
+#https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
+
 """
 
 import matplotlib.pyplot as plt
@@ -33,18 +45,47 @@ def print_working_time():
     working_time = (datetime.now() - cht_start_time) 
     return print('working time ::: %s' % (working_time))
 
-###########################################
+################################################
+### Multiprocessing instead of multithreading
+################################################
+import multiprocessing as proc
+myQueue = proc.Manager().Queue()
 
-xxlim = [-50, 50]
-yylim = [1050.1, 99.9]
+# I love the OOP way.(Custom class for multiprocessing)
+class Multiprocessor():
+    def __init__(self):
+        self.processes = []
+        self.queue = proc.Queue()
 
-base_dir_name = '../1data/'
-            
-for dir_names in sorted(os.listdir(base_dir_name)):
-    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dir_name, dir_names))):
-        for fullname in sorted(glob(os.path.join('{0}{1}/{2}/'\
-                 .format(base_dir_name, dir_names, dir_name), '*solution.csv'))):
-            fullname_el = fullname.split('/')
+    @staticmethod
+    def _wrapper(func, args, kwargs):
+        ret = func(*args, **kwargs)
+        myQueue.put(ret)
+
+    def restart(self):
+        self.processes = []
+        self.queue = proc.Queue()
+
+    def run(self, func, *args, **kwargs):
+        args2 = [func, args, kwargs]
+        p = proc.Process(target=self._wrapper, args=args2)
+        self.processes.append(p)
+        p.start()
+
+    def wait(self):
+        for p in self.processes:
+            p.join()
+        rets = []
+        for p in self.processes:
+            ret = myQueue.get_nowait()
+
+            rets.append(ret)
+        for p in self.processes:
+            p.terminate()
+        return rets
+
+def f(fullname):
+    fullname_el = fullname.split('/')
             #fullname_el = fullname.split('\\')
             filename = fullname_el[-1]
             
@@ -67,7 +108,7 @@ for dir_names in sorted(os.listdir(base_dir_name)):
                         skipfooter=0, engine='python')
         
             if os.path.isfile('{0}.png'.format(fullname[:-4])) \
-                  and not os.path.isfile('{0}.pdf'.format(fullname[:-4])) :
+                  and os.path.isfile('{0}.pdf'.format(fullname[:-4])) :
                 write_log(log_file, '{1} ::: {0} files are already exist'.format(fullname[:-4], datetime.now()))
             else : 
                 try : 
@@ -739,3 +780,33 @@ for dir_names in sorted(os.listdir(base_dir_name)):
                 
                 except Exception as err :
                     write_log(err_log_file, '{2} ::: {0} with {1}'.format(err, fullname, datetime.now()))
+    print('Thread {0} is finished'.format(selected_time))
+    return 0 # Return a dummy value
+    # Putting large values in Queue was slow than expected(~10min)
+    #return mean_array, cnt_array
+
+###########################################
+    
+myMP = Multiprocessor()
+num_cpu = 4
+
+xxlim = [-50, 50]
+yylim = [1050.1, 99.9]
+
+base_dir_name = '../1data/'
+
+for dir_names in sorted(os.listdir(base_dir_name)):
+    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dir_name, dir_names))):
+        fullnames = sorted(glob(os.path.join('{0}{1}/{2}/'\
+                 .format(base_dir_name, dir_names, dir_name), '*solution.csv')))
+            values = []
+            num_batches = len(fullnames) // num_cpu + 1
+            for batch in range(num_batches):
+                myMP.restart()
+                for fullname in fullnames[batch*num_cpu:(batch+1)*num_cpu] :
+                    print('filename.\n {0}'.format(fullname))
+                    myMP.run(f, fullname)
+            print("Batch " + str(batch))
+            myMP.wait()
+            #values.append(myMP.wait())
+            print("OK batch" + str(batch))
