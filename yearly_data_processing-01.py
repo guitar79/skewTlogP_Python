@@ -48,21 +48,34 @@ def print_working_time():
 # Upper air data can be obtained using the siphon package, but for this example we will use
 # some of MetPy's sample data.
 
-dir_names = ['../47090/', '../47102/', '../47104/', '../47122/', '../47138/', 
-             '../47155/', '../47158/', '../47169/', '../47185/', '../47186/']
+base_dir_name = '../yearly_data/'
+
+save_base_dir_name = '../1data/'
+if not os.path.exists('{0}'.format(save_base_dir_name)):
+    os.makedirs('{0}'.format(save_base_dir_name))
+    print ('*'*80)
+    print ('{0} is created'.format(save_base_dir_name))
+else :
+    print ('*'*80)
+    print ('{0} is exist'.format(save_base_dir_name))
+            
+
+dir_names = ['47090/', '47102/', '47104/', '47122/', '47138/', 
+             '47155/', '47158/', '47169/', '47185/', '47186/']
+
 
 for dir_name in dir_names:
         
     #filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
     
-    for fullname in sorted(glob(os.path.join(dir_name, '*.csv'))):
+    for fullname in sorted(glob(os.path.join(base_dir_name+dir_name, '*.csv'))):
         fullname_el = fullname.split('/')
         #fullname_el = fullname.split('\\')
         filename = fullname_el[-1]
         filename_el = filename.split('_')
         obs_year = int(filename_el[-3])
         
-        save_dir_name = '{0}{1}/'.format(dir_name,obs_year)
+        save_dir_name = '{0}{1}/'.format(save_base_dir_name+dir_name,obs_year)
     
         if not os.path.exists('{0}'.format(save_dir_name)):
             os.makedirs('{0}'.format(save_dir_name))
@@ -80,7 +93,8 @@ for dir_name in dir_names:
                                     'dewpoint', 'direction', 'speed', 'FLAG1', 'FLAG2', 'FLAG3'],
                            skipfooter=0, engine='python')
         
-        df['u_wind'], df['v_wind'] = mpcalc.wind_components(df['speed'].values * units('m/s'), np.deg2rad(df['direction'].values * units.deg))
+        df['u_wind'], df['v_wind'] = mpcalc.wind_components(df['speed'].values * units.knots, 
+                                            np.deg2rad(df['direction'].values * units.deg))
         
         # Drop any rows with all NaN values for T, Td
         df = df.dropna(subset=('temperature', 'dewpoint'), how='all').reset_index(drop=True)
@@ -100,10 +114,11 @@ for dir_name in dir_names:
             print('selected_time.\n {0}'.format(selected_time))
             
             if os.path.isfile('{0}{1}_{2}_student.csv'\
-                              .format(save_dir_name, filename_el[-5], selected_time[:13]))\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13]))\
                 and os.path.isfile('{0}{1}_{2}_solution.csv'\
-                              .format(save_dir_name, filename_el[-5], selected_time[:13])):
-                write_log(log_file, '{3} ::: {0}{1}_{2} files are already exist'.format(save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
+                      .format(save_dir_name, filename_el[-5], selected_time[:13])):
+                write_log(log_file, '{3} ::: {0}{1}_{2} files are already exist'\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
             else : 
                 try : 
                     f = lambda s: selected_time in s
@@ -163,10 +178,10 @@ for dir_name in dir_names:
                         = mpcalc.virtual_potential_temperature(p, T, MR)
                                  
                     print('df_selected_time after drop nan.\n{0}'.format(df_selected_time))
-                                    
+                            
                     df_selected_time.to_csv(r'{0}{1}_{2}_solution.csv'\
-                              .format(save_dir_name, filename_el[-5], selected_time[:13]))
-                
+                            .format(save_dir_name, filename_el[-5], selected_time[:13]))
+        
                 except Exception as err :
                     write_log(err_log_file, '{4} ::: {0} with {1}{2} on {3}'\
                               .format(err, dir_name, filename, selected_time[:13], datetime.now()))
