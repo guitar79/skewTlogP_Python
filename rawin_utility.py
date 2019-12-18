@@ -1,0 +1,125 @@
+# Copyright (c) 2015,2016,2017 MetPy Developers.
+# Distributed under the terms of the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+"""
+=================
+Advanced Sounding
+=================
+
+Plot a sounding using MetPy with more advanced features.
+
+Beyond just plotting data, this uses calculations from `metpy.calc` to find the lifted
+condensation level (LCL) and the profile of a surface-based parcel. The area between the
+ambient profile and the parcel profile is colored as well.
+
+conda install -c conda-forge metpy
+
+"""
+
+import os
+from datetime import datetime
+import metpy.calc as mpcalc
+
+from metpy.units import units
+
+add_log = True
+if add_log == True :
+    log_file = 'yearly_data_processing.log'
+    err_log_file = 'yearly_data_processing_err.log'
+    
+def write_log(log_file, log_str):
+    with open(log_file, 'a') as log_f:
+        log_f.write(log_str+'\n')
+    return print (log_str)
+
+#for checking time
+cht_start_time = datetime.now()
+def print_working_time():
+    working_time = (datetime.now() - cht_start_time) #total days for downloading
+    return print('working time ::: %s' % (working_time))
+
+
+def yearly_data_process_df_seleted_date(fullname, df, selected_time, save_dir_name, dir_name):
+    fullname_el = fullname.split('/')
+    #fullname_el = fullname.split('\\')
+    filename = fullname_el[-1]
+    filename_el = filename.split('_')
+                
+    print('site : {0}'.format(dir_name))
+    
+    if os.path.isfile('{0}{1}_{2}_student.csv'\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13]))\
+        and os.path.isfile('{0}{1}_{2}_solution.csv'\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13])):
+        write_log(log_file, '{3} ::: {0}{1}_{2} files are already exist'\
+                  .format(save_dir_name, filename_el[-5], selected_time[:13], datetime.now()))
+    else : 
+        try : 
+            f = lambda s: selected_time in s
+            ids  = df['time'].apply(f)
+            df_selected_time = df[ids]
+            df_selected_time = df_selected_time.sort_values('pressure', ascending=False)
+            
+            print('filename : {0}'.format(fullname))
+            print('df_selected_time.\n{0}'.format(df_selected_time))
+            
+            df_selected_time.to_csv(r'{0}{1}_{2}_student.csv'\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13]))
+            
+            #################################################################################
+            ### We will pull the data out of the example dataset into individual variables and
+            ### assign units.
+            #################################################################################
+            
+            p = df_selected_time['pressure'].values * units.hPa
+            T = df_selected_time['temperature'].values * units.degC
+            Td = df_selected_time['dewpoint'].values * units.degC
+            wind_speed = df_selected_time['speed'].values * units.knots
+            wind_dir = df_selected_time['direction'].values * units.degrees
+            u, v = mpcalc.wind_components(wind_speed, wind_dir)
+                                
+            # Calculate web bulb temperature
+            df_selected_time['wet_bulb_T'] = mpcalc.wet_bulb_temperature(p, T, Td)
+            
+            # Calculate potential temperature
+            df_selected_time['potential_T'] = mpcalc.potential_temperature(p, T)
+            df_selected_time['potential_T_C'] = df_selected_time['potential_T'].values - 273.15
+            
+            # Calculate saturation vaper pressure
+            df_selected_time['saturation_vaper_pressure'] = mpcalc.saturation_vapor_pressure(T)
+            df_selected_time['vaper_pressure']  = mpcalc.saturation_vapor_pressure(Td)
+            SVP = df_selected_time['saturation_vaper_pressure'].values * units.hPa
+            VP = df_selected_time['vaper_pressure'].values * units.hPa
+            
+            # Calculate mixing ratio
+            df_selected_time['saturation_mixing_ratio'] = mpcalc.mixing_ratio(SVP, p)
+            df_selected_time['mixing_ratio'] = mpcalc.mixing_ratio(VP, p)
+            SMR = df_selected_time['saturation_mixing_ratio'].values * units('g/kg')
+            MR = df_selected_time['mixing_ratio'].values * units('g/kg')
+            
+            # Calculate relative humidity
+            df_selected_time['relative_humidity_from_dewpoint'] \
+                = mpcalc.relative_humidity_from_dewpoint(T, Td)
+            df_selected_time['relative_humidity_from_mixing_ratio'] \
+                = mpcalc.relative_humidity_from_mixing_ratio(MR, T, p) 
+            
+            # Calculate virtual temperature
+            df_selected_time['virtual_temperature'] \
+                = mpcalc.virtual_temperature(T, MR)
+                
+            # Calculate virtual potential temperature
+            df_selected_time['virtual_potential_temperature'] \
+                = mpcalc.virtual_potential_temperature(p, T, MR)
+                         
+            print('df_selected_time after drop nan.\n{0}'.format(df_selected_time))
+                            
+            df_selected_time.to_csv(r'{0}{1}_{2}_solution.csv'\
+                      .format(save_dir_name, filename_el[-5], selected_time[:13]))
+        
+        except Exception as err :
+            write_log(err_log_file, '{4} ::: {0} with {1}{2} on {3}'\
+                      .format(err, dir_name, filename, selected_time[:13], datetime.now()))
+    print('Thread {0} is finished'.format(selected_time))
+    return 0 # Return a dummy value
+    # Putting large values in Queue was slow than expected(~10min)
+
