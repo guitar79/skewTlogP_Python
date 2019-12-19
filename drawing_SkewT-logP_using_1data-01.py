@@ -67,7 +67,7 @@ for dir_names in sorted(os.listdir(base_dir_name)):
                         skipfooter=0, engine='python')
         
             if os.path.isfile('{0}.png'.format(fullname[:-4])) \
-                  and not os.path.isfile('{0}.pdf'.format(fullname[:-4])) :
+                  and os.path.isfile('{0}.pdf'.format(fullname[:-4])) :
                 write_log(log_file, '{1} ::: {0} files are already exist'.format(fullname[:-4], datetime.now()))
             else : 
                 try : 

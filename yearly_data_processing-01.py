@@ -88,7 +88,7 @@ for dir_name in dir_names:
         #######################################################################################
         ###지점,일시(UTC),기압(hPa),고도(gpm),기온(°C),이슬점온도(°C),풍향(deg),풍속(knot),
         ###지상 FLAG(null),권계면 FLAG(null),최대풍 FLAG(null)
-        df = pd.read_csv(dir_name+filename, skiprows=1, sep=',', header=None, index_col=0,
+        df = pd.read_csv(base_dir_name+dir_name+filename, skiprows=1, sep=',', header=None, index_col=0,
                            names = ['site', 'time', 'pressure', 'height', 'temperature', 
                                     'dewpoint', 'direction', 'speed', 'FLAG1', 'FLAG2', 'FLAG3'],
                            skipfooter=0, engine='python')
