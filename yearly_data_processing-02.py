@@ -14,7 +14,6 @@ ambient profile and the parcel profile is colored as well.
 
 conda install -c conda-forge metpy
 
-
 """
 
 from glob import glob
@@ -33,49 +32,6 @@ add_log = True
 if add_log == True :
     log_file = 'yearly_data_processing.log'
     err_log_file = 'yearly_data_processing_err.log'
-    
-################################################
-### Multiprocessing instead of multithreading
-################################################
-import multiprocessing as proc
-myQueue = proc.Manager().Queue()
-
-# I love the OOP way.(Custom class for multiprocessing)
-class Multiprocessor():
-    def __init__(self):
-        self.processes = []
-        self.queue = proc.Queue()
-
-    @staticmethod
-    def _wrapper(func, args, kwargs):
-        ret = func(*args, **kwargs)
-        myQueue.put(ret)
-
-    def restart(self):
-        self.processes = []
-        self.queue = proc.Queue()
-
-    def run(self, func, *args, **kwargs):
-        args2 = [func, args, kwargs]
-        p = proc.Process(target=self._wrapper, args=args2)
-        self.processes.append(p)
-        p.start()
-
-    def wait(self):
-        for p in self.processes:
-            p.join()
-        rets = []
-        for p in self.processes:
-            ret = myQueue.get_nowait()
-
-            rets.append(ret)
-        for p in self.processes:
-            p.terminate()
-        return rets
-
-
-myMP = Multiprocessor()
-num_cpu = 4
 
 base_dir_name = '../yearly_data/'
 
@@ -94,8 +50,6 @@ dir_names = ['47090/', '47102/', '47104/', '47122/', '47138/',
 
 for dir_name in dir_names:
         
-    #filename = 'UPPER_SONDE_47122_ALL_2018_2018_2019.csv'
-    
     for fullname in sorted(glob(os.path.join(base_dir_name+dir_name, '*.csv'))):
         
         fullname_el = fullname.split('/')
@@ -141,16 +95,5 @@ for dir_name in dir_names:
             selected_times.append(date1_strf)
             s_start_date = s_start_date + relativedelta(hours=6)
     
-        values = []
-        num_batches = len(selected_times) // num_cpu + 1
-        for batch in range(num_batches):
-            myMP.restart()
-            for selected_time in selected_times[batch*num_cpu:(batch+1)*num_cpu]:
-                print('selected_time.\n {0}'.format(selected_time))
-                #myMP.run(f, fullname, selected_time)
-                myMP.run(rawin_utility.yearly_data_process_df_seleted_date, fullname, df, selected_time, save_dir_name, dir_name)
-
-        print("Batch " + str(batch))
-        myMP.wait()
-        #values.append(myMP.wait())
-        print("OK batch" + str(batch))
+    for selected_time in selected_times:
+        rawin_utility.yearly_data_process_df_seleted_date(fullname, df, selected_time, save_dir_name, dir_name)

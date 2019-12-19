@@ -70,7 +70,7 @@ class Multiprocessor():
 ###########################################
     
 myMP = Multiprocessor()
-num_cpu = 7
+num_cpu = 18
 
 base_dir_name = '../1data/'
 

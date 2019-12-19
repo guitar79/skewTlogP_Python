@@ -18,6 +18,8 @@ conda install -c conda-forge metpy
 
 """
 
+##import matplotlib
+##matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from glob import glob
 import os
@@ -777,7 +779,7 @@ def f(fullname):
             #plt.show()
             # Close the plot
             plt.switch_backend('Agg'),
-            plt.close(fig)
+            #plt.close(fig)
         
         except Exception as err :
             write_log(err_log_file, '{2} ::: {0} with {1}'.format(err, fullname, datetime.now()))
@@ -789,7 +791,7 @@ def f(fullname):
 ###########################################
     
 myMP = Multiprocessor()
-num_cpu = 7
+num_cpu = 8
 
 xxlim = [-50, 50]
 yylim = [1050.1, 99.9]
@@ -807,7 +809,7 @@ for dir_names in sorted(os.listdir(base_dir_name)):
             for fullname in fullnames[batch*num_cpu:(batch+1)*num_cpu] :
                 print('filename.\n {0}'.format(fullname))
                 myMP.run(f, fullname)
-                print("Batch " + str(batch))
-            myMP.wait()
-            #values.append(myMP.wait())
-            print("OK batch" + str(batch))
+        print("Batch " + str(batch))
+        myMP.wait()
+        #values.append(myMP.wait())
+        print("OK batch" + str(batch))
