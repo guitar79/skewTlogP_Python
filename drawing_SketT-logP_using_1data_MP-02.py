@@ -18,8 +18,8 @@ conda install -c conda-forge metpy
 
 """
 
-import matplotlib
-matplotlib.use('Agg')
+##import matplotlib
+##matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from glob import glob
 import os
@@ -778,7 +778,8 @@ def f(fullname):
             # Show the plot
             #plt.show()
             # Close the plot
-            plt.close(fig)
+            plt.switch_backend('Agg'),
+            #plt.close(fig)
         
         except Exception as err :
             write_log(err_log_file, '{2} ::: {0} with {1}'.format(err, fullname, datetime.now()))
