@@ -22,7 +22,7 @@ deactivate
 
 # install module
 conda install spyder
-pip install opencv-python
+pip install metpy
 
 
 # 가상환경 내보내기 (export)
