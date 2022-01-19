@@ -20,21 +20,22 @@ conda install -c conda-forge metpy
 
 from glob import glob
 import os
-import rawin_utility
+import rawin_utilities
 
-add_log = True
-if add_log == True :
-    log_file = 'drawing_SkewT-logP_using_1data.log'
-    err_log_file = 'drawing_SkewT-logP_using_1data_err.log'
+log_dir = "logs/"
+log_file = "{}{}.log".format(log_dir, os.path.basename(__file__)[:-3])
+err_log_file = "{}{}_err.log".format(log_dir, os.path.basename(__file__)[:-3])
+print ("log_file: {}".format(log_file))
+print ("err_log_file: {}".format(err_log_file))
     
 
-base_dir_name = '../1data/'
+base_dr = '../1data/'
 
-for dir_names in sorted(os.listdir(base_dir_name)):
-    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dir_name, dir_names))):
+for dir_names in sorted(os.listdir(base_dr)):
+    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dr, dir_names))):
         fullnames = sorted(glob(os.path.join('{0}{1}/{2}/'\
-                 .format(base_dir_name, dir_names, dir_name), '*solution.csv')))
+                 .format(base_dr, dir_names, dir_name), '*solution.csv')))
         
         for fullname in fullnames :
             print('filename.\n {0}'.format(fullname))
-            rawin_utility.drawing_SkewT_logP_using1data(fullname, base_dir_name, dir_name)
+            rawin_utilities.drawing_SkewT_logP_using1data(fullname, base_dr, dir_name)

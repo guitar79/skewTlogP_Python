@@ -21,15 +21,21 @@ from datetime import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
 
-add_log = True
-if add_log == True :
-    log_file = 'yearly_data_processing.log'
-    err_log_file = 'yearly_data_processing_err.log'
-    
-def write_log(log_file, log_str):
+def write_log2(log_file, log_str):
+    import os
     with open(log_file, 'a') as log_f:
-        log_f.write(log_str+'\n')
-    return print (log_str)
+        log_f.write("{}, {}\n".format(os.path.basename(__file__), log_str))
+    return print ("{}, {}\n".format(os.path.basename(__file__), log_str))
+
+def write_log(log_file, log_str):
+    import time
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    msg = '[' + timestamp + '] ' + log_str
+    print (msg)
+    with open(log_file, 'a') as f:
+        f.write(msg + '\n')
+        
+     
 #for checking time
 cht_start_time = datetime.now()
 def print_working_time():

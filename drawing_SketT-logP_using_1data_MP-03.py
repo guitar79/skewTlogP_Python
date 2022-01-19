@@ -20,7 +20,7 @@ conda install -c conda-forge metpy
 
 from glob import glob
 import os
-import rawin_utility
+import rawin_utilities
 
 add_log = True
 if add_log == True :
@@ -72,12 +72,12 @@ class Multiprocessor():
 myMP = Multiprocessor()
 num_cpu = 18
 
-base_dir_name = '../1data/'
+base_dr = '../1data/'
 
-for dir_names in sorted(os.listdir(base_dir_name)):
-    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dir_name, dir_names))):
+for dir_names in sorted(os.listdir(base_dr)):
+    for dir_name in sorted(os.listdir('{0}{1}/'.format(base_dr, dir_names))):
         fullnames = sorted(glob(os.path.join('{0}{1}/{2}/'\
-                 .format(base_dir_name, dir_names, dir_name), '*solution.csv')))
+                 .format(base_dr, dir_names, dir_name), '*solution.csv')))
         values = []
         num_batches = len(fullnames) // num_cpu + 1
         for batch in range(num_batches):
@@ -85,7 +85,7 @@ for dir_names in sorted(os.listdir(base_dir_name)):
             for fullname in fullnames[batch*num_cpu:(batch+1)*num_cpu] :
                 print('filename.\n {0}'.format(fullname))
                 #myMP.run(f, fullname)
-                myMP.run(rawin_utility.drawing_SkewT_logP_using1data, fullname, base_dir_name, dir_name)
+                myMP.run(rawin_utilities.drawing_SkewT_logP_using1data, fullname, base_dr, dir_name)
             print("Batch " + str(batch))
             myMP.wait()
             #values.append(myMP.wait())

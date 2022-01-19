@@ -27,7 +27,7 @@ import metpy.calc as mpcalc
 #from metpy.cbook import get_test_data
 #from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
-import rawin_utility
+import rawin_utilities
 
 add_log = True
 if add_log == True :
@@ -148,7 +148,7 @@ for dir_name in dir_names:
             for selected_time in selected_times[batch*num_cpu:(batch+1)*num_cpu]:
                 print('selected_time.\n {0}'.format(selected_time))
                 #myMP.run(f, fullname, selected_time)
-                myMP.run(rawin_utility.yearly_data_process_df_seleted_date, fullname, df, selected_time, save_dir_name, dir_name)
+                myMP.run(rawin_utilities.yearly_data_process_df_seleted_date, fullname, df, selected_time, save_dir_name, dir_name)
 
         print("Batch " + str(batch))
         myMP.wait()
