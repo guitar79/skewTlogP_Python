@@ -56,8 +56,8 @@ class Multiprocessor():
     def __init__(self):
         self.processes = []
         self.queue = proc.Queue()
-
     @staticmethod
+    
     def _wrapper(func, args, kwargs):
         ret = func(*args, **kwargs)
         myQueue.put(ret)
