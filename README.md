@@ -1,39 +1,68 @@
-# skewT-logP_python
-
+# skewT-logP_Python
 anaconda environment
-conda create -n skewT-logP_Python_ubuntu_env
-conda create -n skewT-logP_Python_win_env
+
+# Windows
+## 가상환경 리스트
 conda env list
 
-# activate 가상환경 시작
-mac/linux
-conda activate skewT-logP_Python_ubuntu_env
-source activate skewT-logP_Python_ubuntu_env
+## 가상환경 만들기
+conda create -n skewT-logP_Python_win_env
 
-windows
-activate skewT-logP_Python_env
+## activate 가상환경 시작
+conda activate skewT-logP_Python_win_env
 
-# deactivate 가상환경 종료
-mac/linux
-conda deactivate
-
-windows
+## deactivate 가상환경 종료
 deactivate
 
-# install module
-conda install spyder
+## install module
+conda install matplotlib pandas numpy
 pip install metpy
 
+## 가상환경 내보내기 (export)
+conda env export > skewT-logP_Python_win_env.yaml
+
+## .yaml 파일로 새로운 가상환경 만들기
+conda env create -f skewT-logP_Python_win_env.yaml
+
+## .yaml 파일로 가상환경 업데이트(activate 되어있을 때)
+conda env update --file skewT-logP_Python_win_env.yaml
+
+## .yaml 파일로 가상환경 업데이트(deactivate 되어있을 때)
+conda env update --skewT-logP_Python_win_env envname --file skewT-logP_Python_win_env.yaml
+
+## 가상환경 제거하기
+conda env remove -n skewT-logP_Python_win_env
+
+
+# ubuntu
+
+## 가상환경 리스트 출력
+conda env list
+
+## 가상환경 만들기 
+conda create -n skewT-logP_Python_ubuntu_env
+
+## activate 가상환경 시작
+conda activate skewT-logP_Python_ubuntu_env
+
+# deactivate 가상환경 종료
+conda deactivate
+
+# install module
+conda install matplotlib pandas numpy
+pip install metpy
 
 # 가상환경 내보내기 (export)
 conda env export > skewT-logP_Python_ubuntu_env.yaml
-conda env export > skewT-logP_Python_win_env.yaml
 
 # .yaml 파일로 새로운 가상환경 만들기
 conda env create -f skewT-logP_Python_ubuntu_env.yaml
 
-# 가상환경 리스트 출력
-conda env list
+## .yaml 파일로 가상환경 업데이트(activate 되어있을 때)
+conda env update --file skewT-logP_Python_ubuntu_env.yaml
+
+## .yaml 파일로 가상환경 업데이트(deactivate 되어있을 때)
+conda env update --skewT-logP_Python_ubuntu_env envname --file skewT-logP_Python_ubuntu_env.yaml
 
 # 가상환경 제거하기
-conda env remove -n skewT-logP_Python_env  
+conda env remove -n skewT-logP_Python_ubuntu_env
