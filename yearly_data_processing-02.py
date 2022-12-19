@@ -15,25 +15,55 @@ ambient profile and the parcel profile is colored as well.
 conda install -c conda-forge metpy
 
 """
-
-from glob import glob
+#%%
 import os
+from glob import glob
+from pathlib import Path
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import metpy.calc as mpcalc
-#from metpy.cbook import get_test_data
-#from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 import rawin_utilities
+import rawin_utilities
 
-add_log = True
-if add_log == True :
-    log_file = 'yearly_data_processing.log'
-    err_log_file = 'yearly_data_processing_err.log'
+import Python_utilities
+import SkewTlogP_utilities
 
-base_dr = '../yearly_data/'
+
+#%%
+#######################################################
+# for log file
+log_dir = "logs/"
+log_file = "{}{}.log".format(log_dir, os.path.basename(__file__)[:-3])
+err_log_file = "{}{}_err.log".format(log_dir, os.path.basename(__file__)[:-3])
+print ("log_file: {}".format(log_file))
+print ("err_log_file: {}".format(err_log_file))
+if not os.path.exists('{0}'.format(log_dir)):
+    os.makedirs('{0}'.format(log_dir))
+#######################################################
+
+#%%
+#######################################################
+# read all files in base directory for processing
+BASEDIR = 'c:\RS_data\RAWIN_data'
+
+RAWINDIR = BASEDIR / "SkewT-logP_image"
+
+if not RAWINDIR.exists():
+    os.makedirs("{}".format(str(RAWINDIR)))
+    print("{} is created...".format(str(RAWINDIR)))
+
+
+#%%
+fpaths = sorted(list(BASEDIR.glob("*.csv"))
+print ("fpaths: {}".format(fpaths))
+
+
+
 
 save_base_dr = '../1data/'
 if not os.path.exists('{0}'.format(save_base_dr)):

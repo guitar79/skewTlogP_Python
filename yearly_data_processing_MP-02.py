@@ -12,7 +12,6 @@ Beyond just plotting data, this uses calculations from `metpy.calc` to find the 
 condensation level (LCL) and the profile of a surface-based parcel. The area between the
 ambient profile and the parcel profile is colored as well.
 
-conda install -c conda-forge metpy
 
 
 """
@@ -28,6 +27,11 @@ import metpy.calc as mpcalc
 #from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 import rawin_utilities
+
+import Python_utilities
+import SkewT-logP_utilities
+
+
 
 add_log = True
 if add_log == True :
