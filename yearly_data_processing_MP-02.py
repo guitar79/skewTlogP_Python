@@ -12,8 +12,6 @@ Beyond just plotting data, this uses calculations from `metpy.calc` to find the 
 condensation level (LCL) and the profile of a surface-based parcel. The area between the
 ambient profile and the parcel profile is colored as well.
 
-
-
 """
 
 from glob import glob
@@ -29,7 +27,7 @@ from metpy.units import units
 import rawin_utilities
 
 import Python_utilities
-import SkewT-logP_utilities
+import SkewTlogP_utilities
 
 
 

@@ -12,8 +12,6 @@ Beyond just plotting data, this uses calculations from `metpy.calc` to find the 
 condensation level (LCL) and the profile of a surface-based parcel. The area between the
 ambient profile and the parcel profile is colored as well.
 
-conda install -c conda-forge metpy
-
 """
 #%%
 import os
@@ -49,6 +47,7 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
+BASEDIR = 'c:\RS_data\RAWIN_data'
 BASEDIR = 'c:\RS_data\RAWIN_data'
 
 RAWINDIR = BASEDIR / "SkewT-logP_image"

@@ -18,8 +18,9 @@ conda install -c conda-forge metpy
 """
 
 from glob import glob
-import os
+from pathlib import Path
 import numpy as np
+import os
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -29,11 +30,7 @@ import metpy.calc as mpcalc
 from metpy.units import units
 import rawin_utilities
 
-add_log = True
-if add_log == True :
-    log_file = 'yearly_data_processing.log'
-    err_log_file = 'yearly_data_processing_err.log'
-    
+
 ################################################
 ### Multiprocessing instead of multithreading
 ################################################

@@ -17,7 +17,7 @@ conda install -c conda-forge metpy
 #https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
 
 """
-
+#%%
 from glob import glob
 import os
 import numpy as np
@@ -28,6 +28,29 @@ import metpy.calc as mpcalc
 #from metpy.cbook import get_test_data
 #from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
+
+#%%
+#######################################################
+# for log file
+log_dir = "logs/"
+log_file = "{}{}.log".format(log_dir, os.path.basename(__file__)[:-3])
+err_log_file = "{}{}_err.log".format(log_dir, os.path.basename(__file__)[:-3])
+print ("log_file: {}".format(log_file))
+print ("err_log_file: {}".format(err_log_file))
+if not os.path.exists('{0}'.format(log_dir)):
+    os.makedirs('{0}'.format(log_dir))
+#######################################################
+#%%
+#######################################################
+# read all files in base directory for processing
+BASEDIR = "../RnE_2022/"
+BASEDIR = "../RnE_2022/RiLA600_STX-16803_2bin/"
+BASEDIR = astro_utilities.base_dir
+
+OBSRAWDIR = astro_utilities.CCD_obs_dir
+#%%
+BASEDIRs = sorted(Python_utilities.getFullnameListOfsubDir(BASEDIR))
+print ("BASEDIRs: {}".format(BASEDIRs))
 
 add_log = True
 if add_log == True :
