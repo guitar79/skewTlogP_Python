@@ -12,8 +12,6 @@ Beyond just plotting data, this uses calculations from `metpy.calc` to find the 
 condensation level (LCL) and the profile of a surface-based parcel. The area between the
 ambient profile and the parcel profile is colored as well.
 
-conda install -c conda-forge metpy
-conda install xarray=0.12.1
 #https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
 
 """
