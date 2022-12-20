@@ -100,7 +100,7 @@ class draw_skewT_logP():
                 self.skew.ax.axvline(i * 5 - 160 + j, color='brown', linestyle='-', linewidth=0.3)
             self.skew.ax.axvline(i * 5 - 160, color='brown', linestyle='-', linewidth=1.5)
         self.skew.ax.axvline(0, color='brown', linestyle='-', linewidth=1.5, label='isothermal')
-        self.skew.ax.set_xlim(xxlim[0], xxlim[1])
+        self.skew.ax.set_xlim(self.xxlim[0], self.xxlim[1])
         self.skew.ax.tick_params(axis="x", labelsize=14, pad=10, rotation=45, labelcolor='brown')
         self.skew.ax.tick_params(axis="y", labelsize=14, pad=0.5)
 
@@ -138,7 +138,7 @@ class draw_skewT_logP():
             plt.text(UMA[0], self.MA_Upper, '{}'.format(UMA[1]),
                      horizontalalignment='left', verticalalignment='center',
                      fontsize=12, color='green', rotation=UMA[2])
-        return skew
+        return self.skew
 
     def add_mising_ratio(self):
         self.skew.plot_mixing_lines(self.mixing_ratio_ticks, [1050, 400] * units.hPa, color='blue',

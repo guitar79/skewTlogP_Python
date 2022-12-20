@@ -53,11 +53,35 @@ BASEDIR = 'd:\RS_data'
 BASEDIR = Path(BASEDIR)
 O_code = "47155"
 
-SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
+RAWINDAILYDIRCODE = BASEDIR / "Daily" / O_code
+SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" / O_code
 
 if not SKEWTLOGPNDIR.exists():
     os.makedirs("{}".format(str(SKEWTLOGPNDIR)))
     print("{} is created...".format(str(SKEWTLOGPNDIR)))
+#%%
+fpaths = sorted(list(RAWINDAILYDIRCODE.glob("*.csv")))
+print("fpaths: {}".format(fpaths))
+
+#%%
+for fpath in fpaths[:5]:
+    print("fpath: ", fpath)
+    print("fpath.name: ", fpath.name)
+    filename_el = fpath.name.split('_')
+    O_code = filename_el[0]
+    
+    RAWINDAILYDIRCODE = BASEDIR / "Daily" / O_code
+    
+    if not RAWINDAILYDIRCODE.exists():
+        os.makedirs("{}".format(str(RAWINDAILYDIRCODE)))
+    print("{} is created...".format(str(RAWINDAILYDIRCODE)))
+    
+    df = pd.read_csv(fpath, sep=',', encoding='cp949')
+    #df = pd.read_csv(fpath, sep=',', skiprows=1,
+    #                names = ['site', 'dt_str(UTC)', 'pressure(hPa)', 'height', 'temperature(°C)', 
+    #                        'dewpoint(°C)', 'winddirection(deg)', 'windspeed(knot)', 'FLAG1', 'FLAG2', 'FLAG3'], 
+    #                 encoding='euc-kr')
+    print("df:", df)
 
 #%%
 ###########################################
@@ -110,13 +134,10 @@ plt.annotate('$ \cdotp $ filename :\n$ \cdotp $ time :' \
              xy=(0, 1), xytext=(0, 32), va='top', ha='left',
              xycoords='axes fraction', textcoords='offset points')
 
-plt.annotate('Created by Kiehyun.Park@gmail.com using METPY', fontsize=20,
+plt.annotate('Created by gs20010@gs.hs.kr using METPY', fontsize=20,
              xy=(1, 0), xytext=(0, -50), va='top', ha='right',
              xycoords='axes fraction', textcoords='offset points')
 ###########################################################
 ###########################################################
 
-plt.savefig("{}/SKewTlogP_empty.png".format(str(SKEWTLOGPNDIR)))
-
 plt.show()
-# %%
