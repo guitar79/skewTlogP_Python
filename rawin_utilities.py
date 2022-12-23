@@ -2,45 +2,345 @@
 # Distributed under the terms of the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 """
-=================
-Advanced Sounding
-=================
 
-Plot a sounding using MetPy with more advanced features.
-
-Beyond just plotting data, this uses calculations from `metpy.calc` to find the lifted
-condensation level (LCL) and the profile of a surface-based parcel. The area between the
-ambient profile and the parcel profile is colored as well.
-
-conda install -c conda-forge metpy
 
 """
 
 import os
+from glob import glob
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 from datetime import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
 
-def write_log2(log_file, log_str):
-    import os
-    with open(log_file, 'a') as log_f:
-        log_f.write("{}, {}\n".format(os.path.basename(__file__), log_str))
-    return print ("{}, {}\n".format(os.path.basename(__file__), log_str))
 
-def write_log(log_file, log_str):
-    import time
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-    msg = '[' + timestamp + '] ' + log_str
-    print (msg)
-    with open(log_file, 'a') as f:
-        f.write(msg + '\n')
-        
-     
-#for checking time
-cht_start_time = datetime.now()
-def print_working_time():
-    working_time = (datetime.now() - cht_start_time) #total days for downloading
-    return print('working time ::: %s' % (working_time))
+
+class draw_skewT_logP():
+    def __init__(self, skewed_graph):
+        self.skew = skewed_graph
+        self.xxlim = [-50, 50]
+        self.yylim = [1050.1, 99.9]
+        self.DA_Upper = 680
+        self.UDA_list = [(-56.2, -30, -50), (-54.4, -28, -50), (-52.8, -26, -50), (-51.0, -24, -50), (-49.2, -22, -50),
+                         (-47.4, -20, -50), (-45.6, -18, -50), (-43.8, -16, -50), (-42.0, -14, -50), (-40.2, -12, -50),
+                         (-38.4, -10, -49), (-36.4, -8, -49), (-34.5, -6, -49), (-32.7, -4, -50), (-30.8, -2, -50),
+                         (-29.1, 0, -49), (-27.4, 2, -49), (-25.6, 4, -51), (-23.8, 6, -52), (-22.0, 8, -52),
+                         (-20.3, 10, -52), (-18.6, 12, -52), (-16.8, 14, -52), (-15.0, 16, -52), (-13.2, 18, -52),
+                         (-11.4, 20, -52), (-9.6, 22, -52), (-7.8, 24, -52), (-6.0, 26, -52), (-4.2, 28, -52),
+                         (-2.4, 30, -52), (-0.6, 32, -52), (1.1, 34, -52), (2.9, 36, -52), (4.8, 38, -52),
+                         (6.6, 40, -52), (8.5, 42, -52), (10.3, 44, -52)]
+        self.MA_Upper = 530
+        self.UMA_list = [(-70.6, -30, -50), (-68.8, -28, -50), (-66.9, -26, -50), (-65.0, -24, -50), (-63.2, -22, -50),
+                     (-61.3, -20, -50), (-59.3, -18, -50), (-57.3, -16, -50), (-55.2, -14, -50), (-53.1, -12, -50),
+                     (-50.9, -10, -49), (-48.3, -8, -49), (-46.0, -6, -49), (-43.6, -4, -49), (-40.9, -2, -49),
+                     (-38.3, -0, -49), (-35.5, 2, -50), (-32.5, 4, -51), (-29.5, 6, -54), (-26.5, 8, -58), (-23.2, 10, -61),
+                     (-19.9, 12, -64), (-16.6, 14, -69), (-13.1, 16, -72), (-9.8, 18, -76), (-6.4, 20, -79),
+                     (-3.1, 22, -82), (0.1, 24, -85), (3.1, 26, -88), (6.1, 28, -90), (9.1, 30, -92),
+                     (11.9, 32, -94), (14.5, 34, -96), (17.2, 36, -98), (19.7, 38, -100)]
+        self.mixing_ratio_ticks = np.array([0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                                       0.001, 0.0015, 0.002, 0.0025, 0.003,
+                                       0.004, 0.005, 0.006, 0.007, 0.008,
+                                       0.009, 0.010, 0.012, 0.014, 0.016,
+                                       0.018, 0.020, 0.022, 0.024, 0.026,
+                                       0.028, 0.030, 0.033, 0.036, 0.040,
+                                       0.044, 0.048, 0.052, 0.056, 0.060,
+                                       0.065, 0.070]).reshape(-1, 1)
+        self.MRL_Upper = 396
+        self.MRL_Upper_list = [-50.8, -44.6, -38.0, -33.8, -30.9,
+                          -28.4, -23.8, -20.6, -18.0, -15.8,
+                          -12.5, -9.4, -7.2, -5.3, -3.5,
+                          -1.8, -0.2, 2.2, 4.3, 6.3,
+                          8.0, 9.4, 10.8, 12.0, 13.2,
+                          14.3, 15.5]
+        self.MRL_Under = 1068
+        self.MRL_Under_list = [-41.1, -34.2, -27.0, -22.5, -19.0,
+                          -16.5, -11.5, -8.0, -5.0, -2.7,
+                          1.2, 4.4, 7.0, 9.2, 11.3,
+                          13.0, 14.7, 17.5, 19.9, 22.0,
+                          23.9, 25.5, 27.2, 28.6, 29.9,
+                          31.2, 32.3, 34.0, 35.4, 37.2,
+                          38.9, 40.3, 41.8, 43.0, 44.2,
+                          45.6, 47.0]
+    def add_isobar(self):
+        self.skew.ax.set_ylim(self.yylim[0], self.yylim[1])
+        yts1 = list(np.arange(1050, 99, -10))
+        self.skew.ax.set_yticks(yts1)
+
+        yts2 = list(np.arange(1050, 99, -50))
+        yticklabels = []
+        i = 0
+        for ytick in yts2:
+            yticklabels.append(ytick)
+            for j in range(4):
+                yticklabels.append('')
+            self.skew.plot([ytick, ytick], [-150, 100], 'k', linewidth=0.6)
+
+            # 기온축이 기울어 지고, 기압축이 로그스케일이어서 텍스트 정렬이 흐트러지는 문제를 36기 유호혁 학생이 아래와 같이 해결함.
+            # isobar text
+            if ytick >= 200:
+                plt.text(-20 - (np.log(1050) - np.log(1050 - i * 50)) * 35, ytick, '{0}'.format(ytick),
+                         horizontalalignment='left', verticalalignment='center',
+                         fontsize=14, color='black', alpha=.30)
+            if ytick >= 500:
+                plt.text(20 - (np.log(1050) - np.log(1050 - i * 50)) * 35, ytick, '{0}'.format(ytick),
+                         horizontalalignment='left', verticalalignment='center',
+                         fontsize=14, color='black', alpha=.30)
+        self.skew.ax.set_yticklabels(yticklabels[:-4], minor=False)
+        return self.skew
+
+    def add_isothermal(self):
+        for i in range(1, 12):
+            self.skew.ax.axvline(i * 20 - 155, color='green', linestyle='-', linewidth=112, alpha=0.1)
+        for i in range(46):
+            for j in range(1, 10):
+                self.skew.ax.axvline(i * 5 - 160 + j, color='brown', linestyle='-', linewidth=0.3)
+            self.skew.ax.axvline(i * 5 - 160, color='brown', linestyle='-', linewidth=1.5)
+        self.skew.ax.axvline(0, color='brown', linestyle='-', linewidth=1.5, label='isothermal')
+        self.skew.ax.set_xlim(self.xxlim[0], self.xxlim[1])
+        self.skew.ax.tick_params(axis="x", labelsize=14, pad=10, rotation=45, labelcolor='brown')
+        self.skew.ax.tick_params(axis="y", labelsize=14, pad=0.5)
+
+        # 기온축이 기울어 지고, 기압축이 로그스케일이어서 텍스트 정렬이 흐트러지는 문제를 36기 유호혁 학생이 아래와 같이 해결함.
+        # isothermal text
+        for i in range(36):
+            if i < 16:
+                plt.text(-i * 5 - 10.5, 1050 / 10 ** (i / 35), '{0}'.format(-i * 5 - 10),
+                         horizontalalignment='left', verticalalignment='center',
+                         fontsize=14, rotation=45, color='brown', alpha=0.7)
+            if i < 30:
+                plt.text(-i * 5 + 29.5, 1050 / 10 ** (i / 35), '{0}'.format(-i * 5 + 30),
+                         horizontalalignment='left', verticalalignment='center',
+                         fontsize=14, rotation=45, color='brown', alpha=0.7)
+            if i > 7:
+                plt.text(-i * 5 + 69.5, 1050 / 10 ** (i / 35), '{0}'.format(-i * 5 + 70),
+                         horizontalalignment='left', verticalalignment='center',
+                         fontsize=14, rotation=45, color='brown', alpha=0.7)
+        return self.skew
+
+    def add_dry_adiabats(self):
+        self.skew.plot_dry_adiabats(t0=np.arange(-50, 260, 2) * units.degC,
+                               color='orange', linestyle='-', linewidth=1.0, label='dry adiabat')
+
+        for UDA in self.UDA_list:
+            plt.text(UDA[0], self.DA_Upper, '{}'.format(UDA[1]),
+                     horizontalalignment='left', verticalalignment='center',
+                     fontsize=12, color='orange', rotation=UDA[2])
+        return self.skew
+    def add_moist_adiabats(self):
+        self.skew.plot_moist_adiabats(t0=np.arange(-50, 160, 2) * units.degC,
+                                 color='green', linestyle='-', linewidth=1.0, label='saturation adiabat')
+
+        for UMA in self.UMA_list:
+            plt.text(UMA[0], self.MA_Upper, '{}'.format(UMA[1]),
+                     horizontalalignment='left', verticalalignment='center',
+                     fontsize=12, color='green', rotation=UMA[2])
+        return self.skew
+
+    def add_mising_ratio(self):
+        self.skew.plot_mixing_lines(self.mixing_ratio_ticks, [1050, 400] * units.hPa, color='blue',
+                               linestyle='--', linewidth=1.0, label='mixing ratio')
+        plt.text(16.5, self.MRL_Upper, 'mixing ratio',
+                 horizontalalignment='left', verticalalignment='center',
+                 fontsize=9, color='blue')
+        for i in range(len(self.MRL_Upper_list)):
+            plt.text(self.MRL_Upper_list[i], self.MRL_Upper, '{0}'.format(self.mixing_ratio_ticks[i][0] * 1000),
+                     horizontalalignment='left', verticalalignment='center',
+                     fontsize=9, color='blue')
+        plt.text(-46.5, self.MRL_Under, 'mixing ratio',
+                 horizontalalignment='left', verticalalignment='center',
+                 fontsize=9, color='blue')
+        for i in range(len(self.MRL_Under_list)):
+            plt.text(self.MRL_Under_list[i], self.MRL_Under, '{0}'.format(self.mixing_ratio_ticks[i][0] * 1000),
+                     horizontalalignment='left', verticalalignment='center',
+                     fontsize=9, color='blue')
+
+###########################################################
+### 등온선(isothem) 그리는 함수 정의
+###########################################################
+def add_isothermal(plt, skew, xxlim, yylim) :
+    # 등온선의 녹색 영역 표시
+    for i in range(1,12) :
+        skew.ax.axvline(i*20-155, color='green', linestyle='-', linewidth=112, alpha=0.1)
+
+    # 갈색 등온선의 그리기 
+    for i in range(46) :
+        for j in range(1,10) :
+            skew.ax.axvline(i*5-160+j, color='brown', linestyle='-', linewidth=0.3)
+        skew.ax.axvline(i*5-160, color='brown', linestyle='-', linewidth=1.5)
+    skew.ax.axvline(0, color='brown', linestyle='-', linewidth=1.5, label='isothermal')
+
+    # 가로(기온)축 표시하기
+    skew.ax.set_xlim(xxlim[0], xxlim[1])
+    skew.ax.tick_params(axis="x", labelsize=14, pad=10, rotation=45, labelcolor='brown')
+    skew.ax.tick_params(axis="y", labelsize=14, pad=0.5)
+
+    # 기온축이 기울어 지고, 기압축이 로그스케일이어서 텍스트 정렬이 흐트러지는 문제를 36기 유호혁 학생이 아래와 같이 해결함.
+    #isothermal text
+    for i in range(36):    
+        if i < 16:
+            plt.text(-i*5-10.5, 1050 / 10**(i/35), '{0}'.format(-i*5-10), 
+                horizontalalignment='left', verticalalignment='center', 
+                fontsize=14, rotation=45, color='brown', alpha=0.7)
+        if i < 30:
+            plt.text(-i*5+29.5, 1050 / 10**(i/35), '{0}'.format(-i*5+30), 
+                horizontalalignment='left', verticalalignment='center', 
+                fontsize=14, rotation=45, color='brown', alpha=0.7)
+        if i > 7 : 
+            plt.text(-i*5+69.5, 1050 / 10**(i/35), '{0}'.format(-i*5+70), 
+                horizontalalignment='left', verticalalignment='center', 
+                fontsize=14, rotation=45, color='brown', alpha=0.7)    
+    return skew    
+###########################################################
+
+
+###########################################################
+### 등압선 그리는 함수 정의
+###########################################################
+def add_isobar(plt, skew, xxlim, yylim):
+    skew.ax.set_ylim(yylim[0], yylim[1])
+    yts1 = list(np.arange(1050, 99, -10))  # 10 hPa 간격 (가는 선) 표시
+    skew.ax.set_yticks(yts1)
+
+    # 50 hPa 간격
+    yts2 = list(np.arange(1050, 99, -50))  # 50 hPa 간격 (굵은 선) 표시
+    yticklabels=[]
+    i=0
+    for ytick in yts2 : 
+        yticklabels.append(ytick)
+        for j in range(4):
+            yticklabels.append('')
+        skew.plot([ytick, ytick], [-150,100], 'k', linewidth=0.6)
+    
+        # 기온축이 기울어 지고, 기압축이 로그스케일이어서 텍스트 정렬이 흐트러지는 문제를 36기 유호혁 학생이 아래와 같이 해결함.
+        #isobar text
+        if ytick >= 200 : 
+            plt.text(-20-(np.log(1050)-np.log(1050-i*50))*35, ytick, '{0}'.format(ytick), 
+                horizontalalignment='left', verticalalignment='center', 
+                fontsize=14, color='black', alpha=.30)
+        if ytick >= 500 : 
+            plt.text(20-(np.log(1050)-np.log(1050-i*50))*35, ytick, '{0}'.format(ytick), 
+                horizontalalignment='left', verticalalignment='center', 
+                fontsize=14, color='black', alpha=.30)
+
+    #print("yticklabels: {}".format(yticklabels))
+    #print("len(yticklabels): {}".format(len(yticklabels)))
+
+    skew.ax.set_yticklabels(yticklabels[:-4], minor=False)
+    
+    return skew
+###########################################################
+
+
+###########################################################
+### 건조 단열선 그리는 함수 정의
+###########################################################
+def add_dry_adiabats(skew):
+    skew.plot_dry_adiabats(t0=np.arange(-50, 260, 2) * units.degC, 
+                            color='orange', linestyle='-', linewidth=1.0, label='dry adiabat')
+
+    ### Upper dry adiabats text
+    DA_Upper = 680
+
+    UDA_list = [(-56.2, -30, -50), (-54.4, -28, -50), (-52.8, -26, -50), (-51.0, -24, -50), (-49.2, -22, -50), 
+                    (-47.4, -20, -50), (-45.6, -18, -50), (-43.8, -16, -50), (-42.0, -14, -50), (-40.2, -12, -50), 
+                    (-38.4, -10, -49), (-36.4, -8, -49), (-34.5, -6, -49), (-32.7, -4, -50), (-30.8, -2, -50), 
+                    (-29.1, 0, -49), (-27.4, 2, -49), (-25.6, 4, -51), (-23.8, 6, -52), (-22.0, 8, -52),
+                    (-20.3, 10, -52), (-18.6, 12, -52), (-16.8, 14, -52), (-15.0, 16, -52), (-13.2, 18, -52),
+                    (-11.4, 20, -52), (-9.6, 22, -52), (-7.8, 24, -52), (-6.0, 26, -52), (-4.2, 28, -52),
+                    (-2.4, 30, -52), (-0.6, 32, -52), (1.1, 34, -52), (2.9, 36, -52), (4.8, 38, -52),
+                    (6.6, 40, -52), (8.5, 42, -52), (10.3, 44, -52)]
+
+    for UDA in UDA_list :
+        plt.text(UDA[0], DA_Upper, '{}'.format(UDA[1]), 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=12, color='orange', rotation=UDA[2])
+    return skew
+###########################################################
+
+
+###########################################################
+### 습윤단열선 그리는 함수 정의
+###########################################################
+def add_moist_adiabats(skew) :
+    skew.plot_moist_adiabats(t0=np.arange(-50, 160, 2) * units.degC, 
+                            color='green', linestyle='-', linewidth=1.0, label='saturation adiabat')
+
+    ### Upper moist adiabats text
+    MA_Upper = 530
+    UMA_list = [(-70.6, -30, -50), (-68.8, -28, -50), (-66.9, -26, -50), (-65.0, -24, -50), (-63.2, -22, -50), 
+                (-61.3, -20, -50), (-59.3, -18, -50), (-57.3, -16, -50), (-55.2, -14, -50), (-53.1, -12, -50), 
+                (-50.9, -10, -49), (-48.3, -8, -49), (-46.0, -6, -49), (-43.6, -4, -49), (-40.9, -2, -49), 
+                (-38.3, -0, -49), (-35.5, 2, -50), (-32.5, 4, -51), (-29.5, 6, -54), (-26.5, 8, -58), (-23.2, 10, -61),
+                (-19.9, 12, -64), (-16.6, 14, -69), (-13.1, 16, -72), (-9.8, 18, -76), (-6.4, 20, -79), 
+                (-3.1, 22, -82), (0.1, 24, -85), (3.1, 26, -88), (6.1, 28, -90), (9.1, 30, -92), 
+                (11.9, 32, -94), (14.5, 34, -96), (17.2, 36, -98), (19.7, 38, -100)]
+    for UMA in UMA_list :
+        plt.text(UMA[0], MA_Upper, '{}'.format(UMA[1]), 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=12, color='green', rotation=UMA[2])  
+    return skew
+###########################################################
+
+
+###########################################################
+### 포화혼합비선 그리는 함수 정의
+###########################################################
+
+def add_mising_ratio(skew) :
+    mixing_ratio_ticks = np.array([0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 
+                0.001, 0.0015, 0.002, 0.0025, 0.003, 
+                0.004, 0.005, 0.006, 0.007, 0.008, 
+                0.009, 0.010, 0.012, 0.014, 0.016, 
+                0.018, 0.020, 0.022, 0.024, 0.026, 
+                0.028, 0.030, 0.033, 0.036, 0.040, 
+                0.044, 0.048, 0.052, 0.056, 0.060, 
+                0.065, 0.070]).reshape(-1, 1)
+    skew.plot_mixing_lines(mixing_ratio_ticks, [1050, 400] * units.hPa, color='blue', 
+                            linestyle='--', linewidth=1.0, label='mixing ratio')
+
+    ### Upper mixing ratio text
+    MRL_Upper = 396
+
+    plt.text(16.5, MRL_Upper, 'mixing ratio', 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=9, color='blue')
+    MRL_Upper_list = [-50.8, -44.6, -38.0, -33.8, -30.9,
+                    -28.4, -23.8, -20.6, -18.0, -15.8, 
+                    -12.5, -9.4, -7.2, -5.3, -3.5,
+                    -1.8, -0.2, 2.2, 4.3, 6.3,
+                    8.0, 9.4, 10.8, 12.0, 13.2,
+                    14.3, 15.5]
+    for i in range(len(MRL_Upper_list)) :
+        plt.text(MRL_Upper_list[i], MRL_Upper, '{0}'.format(mixing_ratio_ticks[i][0]*1000), 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=9, color='blue')  
+
+    ### bottom mixing ratio text
+    MRL_Under = 1068
+
+    plt.text(-46.5, MRL_Under, 'mixing ratio', 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=9, color='blue')
+
+    MRL_Under_list = [-41.1, -34.2, -27.0, -22.5, -19.0,
+                    -16.5, -11.5, -8.0, -5.0, -2.7, 
+                    1.2, 4.4, 7.0, 9.2, 11.3,
+                    13.0, 14.7, 17.5, 19.9, 22.0,
+                    23.9, 25.5, 27.2, 28.6, 29.9,
+                    31.2, 32.3, 34.0, 35.4, 37.2,
+                    38.9, 40.3, 41.8, 43.0, 44.2,
+                    45.6, 47.0]
+    for i in range(len(MRL_Under_list)) :
+        plt.text(MRL_Under_list[i], MRL_Under, '{0}'.format(mixing_ratio_ticks[i][0]*1000), 
+            horizontalalignment='left', verticalalignment='center', 
+            fontsize=9, color='blue') 
+    return skew
+###########################################################
+
 
 
 def yearly_data_process_df_seleted_date(fullname, df, selected_time, save_dir_name, dir_name):
