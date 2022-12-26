@@ -49,6 +49,7 @@ if not os.path.exists('{0}'.format(log_dir)):
 # read all files in base directory for processing
 BASEDIR = 'c:\RS_data\RAWIN_data'
 BASEDIR = 'd:\RS_data\RAWIN_data'
+
 BASEDIR = Path(BASEDIR)
 
 SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
@@ -104,6 +105,6 @@ plt.annotate('Created by Kiehyun.Park@gmail.com\n using METPY', fontsize=10,
 ###########################################################
 
 plt.savefig("{}/SKewTlogP_basic(en).png".format(str(SKEWTLOGPNDIR)))
-#plt.show()
-#plt.close()
+plt.show()
+plt.close()
 # %%

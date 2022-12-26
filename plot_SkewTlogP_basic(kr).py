@@ -51,7 +51,11 @@ if not os.path.exists('{0}'.format(log_dir)):
 #######################################################
 # read all files in base directory for processing
 BASEDIR = 'c:\RS_data\RAWIN_data'
+<<<<<<< HEAD
 BASEDIR = 'd:\RS_data\RAWIN_data'
+=======
+#BASEDIR = 'd:\RS_data\RAWIN_data'
+>>>>>>> f7f3545b01e736ecb79eef8b97596f3678980a2c
 BASEDIR = Path(BASEDIR)
 
 SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
@@ -64,23 +68,36 @@ if not SKEWTLOGPNDIR.exists():
 O_code = "47090"
 
 RAWINDAILYDIRCODE = BASEDIR / "Daily" / O_code
+<<<<<<< HEAD
 
 SKEWTLOGPNSITEDIR = BASEDIR / "SkewTlogP_image" / O_code
 
 if not SKEWTLOGPNSITEDIR.exists():
     os.makedirs("{}".format(str(SKEWTLOGPNSITEDIR)))
 print("{} is created...".format(str(SKEWTLOGPNSITEDIR)))
+=======
+SKEWTLOGPNSITEDIR = BASEDIR / "SkewTlogP_image" / O_code
+
+if not SKEWTLOGPNSITEDIR.exists():
+    os.makedirs("{}".format(str(RAWINDAILYDIRCODE)))
+print("{} is created...".format(str(RAWINDAILYDIRCODE)))
+>>>>>>> f7f3545b01e736ecb79eef8b97596f3678980a2c
 
 fpaths = sorted(list(RAWINDAILYDIRCODE.glob("*.csv")))
 print("fpaths: {}".format(fpaths))
 
 #%%
+<<<<<<< HEAD
 for fpath in fpaths[:]:
+=======
+for fpath in fpaths[:200]:
+>>>>>>> f7f3545b01e736ecb79eef8b97596f3678980a2c
     print("fpath: ", fpath)
     print("fpath.name: ", fpath.name)
     filename_el = fpath.name.split('_')
     O_code = filename_el[0]
     
+<<<<<<< HEAD
     df = pd.read_csv(fpath, sep=',', 
                  encoding='utf8')
     #df = pd.read_csv(fpath, sep=',', skiprows=1,
@@ -92,6 +109,20 @@ for fpath in fpaths[:]:
     df = df.dropna(subset=('winddirection(deg)', 
                     'windspeed(knot)'), 
                     ).reset_index(drop=True)
+=======
+    #df = pd.read_csv(fpath, sep=',', encoding='cp949')
+    df = pd.read_csv(fpath, sep=',', skiprows=1,
+                    names = ['site', 'dt_str(UTC)', 'pressure(hPa)', 'height', 'temperature(°C)', 
+                            'dewpoint(°C)', 'winddirection(deg)', 'windspeed(knot)', 'FLAG1', 'FLAG2', 'FLAG3'], 
+                     encoding='euc-kr')
+    #df = pd.read_csv(fpath, sep=',', 
+    #                 encoding='euc-kr')
+    df = df.dropna(subset=('pressure(hPa)', 'temperature(°C)', 
+                            'dewpoint(°C)', 'winddirection(deg)', 
+                            'windspeed(knot)'), how='all'
+               ).reset_index(drop=True)
+    df = df.drop_duplicates()
+    
     # Calculate wind vector
     df['u_wind'], df['v_wind'] = mpcalc.wind_components(df['windspeed(knot)'].values * u.knots, 
                             np.deg2rad(df['winddirection(deg)'].values * u.deg))
@@ -102,7 +133,6 @@ for fpath in fpaths[:]:
 
     df = df.drop_duplicates()
     
-    #df[['u_wind', 'v_wind']]
     print("df:", df)
     print("len(df):", len(df))
     #%%
@@ -139,8 +169,8 @@ for fpath in fpaths[:]:
             label = 'temperature(°C)')
     
     # 실선도 추가해 주자.
-    skew.plot(df['pressure(hPa)'].values * u.hPa,  #기압
-            df['temperature(°C)'].values * u.degC, #기온
+    skew.plot(df['pressure(hPa)'].values * u.hPa,   #기압
+            df['temperature(°C)'].values * u.degC,  #기온
             'r')
     #####################################################################
 
@@ -201,6 +231,7 @@ for fpath in fpaths[:]:
     ###########################################################
 
     # Create a hodograph
+
     ax = fig.add_subplot(gs[1:2, -1])
     h = Hodograph(ax, component_range=60.)
     h.add_grid(increment=20)
