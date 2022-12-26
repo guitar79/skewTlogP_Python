@@ -47,17 +47,17 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = 'c:\RS_data'
-BASEDIR = 'd:\RS_data'
+BASEDIR = 'c:\RS_data\RAWIN_data'
+BASEDIR = 'd:\RS_data\RAWIN_data'
 BASEDIR = Path(BASEDIR)
 
-RAWINDIR = BASEDIR / "RAWIN_data"
-if not RAWINDIR.exists():
-    os.makedirs("{}".format(str(RAWINDIR)))
-    print("{} is created...".format(str(RAWINDIR)))
+SONDEDIR = BASEDIR / "UPPER_Sonde"
+if not SONDEDIR.exists():
+    os.makedirs("{}".format(str(SONDEDIR)))
+    print("{} is created...".format(str(SONDEDIR)))
 
 #%%
-fpaths = sorted(list(RAWINDIR.glob("*.csv")))
+fpaths = sorted(list(SONDEDIR.glob("*.csv")))
 print("fpaths: {}".format(fpaths))
 
 #%%
@@ -84,7 +84,8 @@ for fpath in fpaths:
 
     # %%
     df['dt_YmdH(UTC)'] = pd.to_datetime(df['dt_str(UTC)'])
-    df = df.sort_values(by=['dt_YmdH(UTC)', 'pressure(hPa)'])
+    df = df.sort_values(by=['dt_YmdH(UTC)', 'pressure(hPa)'],
+                        ascending = False)
     print("df[['dt_YmdH(UTC)','pressure(hPa)']]:", df[['dt_YmdH(UTC)', 'pressure(hPa)']])
     # %%
     print("df['dt_YmdH(UTC)'].unique():\n {}".format(df['dt_YmdH(UTC)'].unique()))
