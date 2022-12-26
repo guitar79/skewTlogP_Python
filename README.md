@@ -15,7 +15,7 @@ conda activate skewTlogP_Python_win_env
 deactivate
 
 ## install module
-conda install matplotlib pandas numpy
+conda install matplotlib pandas numpy jupyter
 pip install metpy
 
 ## 가상환경 내보내기 (export)
@@ -49,7 +49,7 @@ conda activate skewTlogP_Python_ubuntu_env
 conda deactivate
 
 # install module
-conda install matplotlib pandas numpy
+conda install matplotlib pandas numpy jupyter
 pip install metpy
 
 # 가상환경 내보내기 (export)
