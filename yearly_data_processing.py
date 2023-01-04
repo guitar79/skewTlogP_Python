@@ -71,13 +71,12 @@ for fpath in fpaths:
         os.makedirs("{}".format(str(RAWINDAILYDIRCODE)))
     print("{} is created...".format(str(RAWINDAILYDIRCODE)))
     
-    #df = pd.read_csv(fpath, sep=',', encoding='cp949')
+    #df = pd.read_csv(fpath, sep=',', encoding='cp949')  #encoding='euc-kr'  #encoding='utf8'
+    #df = pd.read_csv(fpath, sep=',', encoding='euc-kr')
     df = pd.read_csv(fpath, sep=',', skiprows=1,
                     names = ['site', 'dt_str(UTC)', 'pressure(hPa)', 'height', 'temperature(°C)', 
                             'dewpoint(°C)', 'winddirection(deg)', 'windspeed(knot)', 'FLAG1', 'FLAG2', 'FLAG3'], 
-                     encoding='euc-kr')
-    #df = pd.read_csv(fpath, sep=',', 
-    #                 encoding='euc-kr')
+                     encoding='utf8')
     print("df:", df)
 
     # %%
