@@ -17,9 +17,9 @@ from datetime import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
 
-BASEDIR = 'c:\RS_data\RAWIN_data'
-BASEDIR = 'd:\RS_data\RAWIN_data'
-BASEDIR ='/mnt/6TB1/RS_data/RAWIN_data'
+BASEDIR = 'c:\Rdata\RAWIN_data'
+BASEDIR = 'd:\Rdata\RAWIN_data'
+#BASEDIR ='/mnt/6TB1/RS_data/RAWIN_data'
 BASEDIR = Path(BASEDIR)
 
 
