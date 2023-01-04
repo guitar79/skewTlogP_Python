@@ -54,9 +54,9 @@ if not os.path.exists('{0}'.format(log_dir)):
 O_code = "47090"
 O_codes = ["47090", "47102", "47104", "47122", "47138", 
         "47155", "47158", "47169", "47185", "47186"]
-for O_code in O_codes[4:]:
+for O_code in O_codes[:]:
     RAWINDAILYCODEDIR = rawin_utilities.BASEDIR / "Daily" / O_code
-    SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_image" / O_code
+    SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_basic_Hodo" / O_code
 
     if not SKEWTLOGPCODEDIR.exists():
         os.makedirs("{}".format(str(SKEWTLOGPCODEDIR)))
@@ -72,22 +72,19 @@ for O_code in O_codes[4:]:
         print("fpath.name: ", fpath.name)
         filename_el = fpath.name.split('_')
         O_code = filename_el[0]
-        try: 
+        try:
+            with open(fpath) as f:
+                print("f:", f)
+                print("f.encoding:", f.encoding)
+                encoding = f.encoding
+        
             df = pd.read_csv(fpath, 
-                            #encoding='cp949',
-                            #encoding='euc-kr',
-                            encoding='utf8',
+                            #encoding = encoding,
+                            encoding = "utf8",
                             sep=',')
+            print("df:", df)
+            print("df.columns:", df.columns)
 
-            #df = pd.read_csv(fpath, 
-            #               skiprows=1,
-            #               names = ['site', 'dt_str(UTC)', 'pressure(hPa)', 'height', 'temperature(°C)', 
-            #                        'dewpoint(°C)', 'winddirection(deg)', 'windspeed(knot)', 'FLAG1', 'FLAG2', 'FLAG3'], 
-                            #encoding='cp949',
-                            #encoding='euc-kr',
-                            #encoding='utf8',
-                            #sep=',')
-            
             df = df.dropna(subset=('pressure(hPa)', 
                                     'temperature(°C)',
                                     'dewpoint(°C)', 
@@ -109,11 +106,9 @@ for O_code in O_codes[4:]:
             #%%
             # 한글 폰트 사용을 위해서 세팅
             from matplotlib import font_manager, rc
-            #font_path = "C:/Windows/Fonts/NGULIM.TTF"
-            #font = font_manager.FontProperties(fname=font_path).get_name()
-            #rc('font', family=font)
-            font = font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
-            rc('font', family='NanumGothicCoding')
+            font_path = "C:/Windows/Fonts/NGULIM.TTF"
+            font = font_manager.FontProperties(fname=font_path).get_name()
+            rc('font', family=font)
             ###########################################
             ### Create a new figure. The dimensions here give a good aspect ratio.
             ### Skew T - log P diagram은 가로, 세로 비율이 적절해야 건조단열선, 습윤단열선의 기울기가 적절하게 그려진다.
@@ -201,9 +196,9 @@ for O_code in O_codes[4:]:
                             fontsize=7, xy=(0, 1), xytext=(0, 15), va='top', ha='left',
                             xycoords='axes fraction', textcoords='offset points')
 
-            plt.annotate('Created by Kiehyun.Park@gmail.com\n using METPY', 
-                            fontsize=10, xy=(1, 0), xytext=(0, -40), va='top', ha='right',
-                            xycoords='axes fraction', textcoords='offset points')
+            # plt.annotate('Created by Kiehyun.Park@gmail.com\n using METPY', 
+            #                 fontsize=10, xy=(1, 0), xytext=(0, -40), va='top', ha='right',
+            #                 xycoords='axes fraction', textcoords='offset points')
             ###########################################################
             ###########################################################
 
@@ -219,7 +214,7 @@ for O_code in O_codes[4:]:
             plt.subplots_adjust(left=None, bottom=None, 
                                     right=None, top=None, wspace=.05, hspace=.05)
             
-            plt.savefig("{}/{}_SKewTlogP_basic.png".format(str(SKEWTLOGPCODEDIR), 
+            plt.savefig("{}/{}_SKewTlogP_basic_Hodo.png".format(str(SKEWTLOGPCODEDIR), 
                                                             fpath.stem))
             #plt.show()
             #plt.close()

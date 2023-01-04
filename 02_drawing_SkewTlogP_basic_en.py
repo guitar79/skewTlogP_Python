@@ -47,20 +47,11 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = 'c:\RS_data\RAWIN_data'
-BASEDIR = 'd:\RS_data\RAWIN_data'
+SKEWTLOGPDIR = rawin_utilities.BASEDIR / "SkewTlogP_basic" 
 
-BASEDIR = Path(BASEDIR)
-
-SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
-
-if not SKEWTLOGPNDIR.exists():
-    os.makedirs("{}".format(str(SKEWTLOGPNDIR)))
-    print("{} is created...".format(str(SKEWTLOGPNDIR)))
-
-O_code = "47155"
-
-SKEWTLOGPNSITEDIR = BASEDIR / "SkewTlogP_image" / O_code
+if not SKEWTLOGPDIR.exists():
+    os.makedirs("{}".format(str(SKEWTLOGPDIR)))
+    print("{} is created...".format(str(SKEWTLOGPDIR)))
 
 #%%
 # 한글 폰트 사용을 위해서 세팅
@@ -94,17 +85,12 @@ skew.plot_mixing_lines(label = 'saturation mising ratio')
 # legend 추가
 plt.legend(loc='upper left')
 
-###########################################################
-#####아래에 코딩을 완성하시오...
-###########################################################
-
 plt.annotate('Created by Kiehyun.Park@gmail.com\n using METPY', fontsize=10,
              xy=(1, 0), xytext=(0, -40), va='top', ha='right',
              xycoords='axes fraction', textcoords='offset points')
 ###########################################################
 ###########################################################
 
-plt.savefig("{}/SKewTlogP_basic(en).png".format(str(SKEWTLOGPNDIR)))
-plt.show()
-plt.close()
-# %%
+plt.savefig("{}/SKewTlogP_basic_en.png".format(str(SKEWTLOGPDIR)))
+#plt.show()
+#plt.close()
