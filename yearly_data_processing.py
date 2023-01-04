@@ -47,10 +47,7 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = 'c:\RS_data\RAWIN_data'
-BASEDIR = 'd:\RS_data\RAWIN_data'
-
-BASEDIR = Path(BASEDIR)
+BASEDIR = Path(rawin_utilities.BASEDIR)
 
 SONDEDIR = BASEDIR / "UPPER_Sonde"
 if not SONDEDIR.exists():
