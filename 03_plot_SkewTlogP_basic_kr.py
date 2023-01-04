@@ -217,7 +217,7 @@ for O_code in O_codes[:]:
             plt.savefig("{}/{}_SKewTlogP_basic.png".format(str(SKEWTLOGPCODEDIR), 
                                                             fpath.stem))
             #plt.show()
-            #plt.close()
+            plt.close()
         
         except Exception as err :
             print("X"*60)

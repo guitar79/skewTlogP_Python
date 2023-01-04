@@ -93,5 +93,5 @@ plt.legend(loc='upper left')
 
 plt.savefig("{}/SKewTlogP_basic_kr.png".format(str(SKEWTLOGPDIR)))
 #plt.show()
-#plt.close()
+plt.close()
 # %%
