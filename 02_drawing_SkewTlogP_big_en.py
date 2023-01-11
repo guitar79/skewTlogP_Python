@@ -49,21 +49,11 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = 'c:\RS_data\RAWIN_data'
-BASEDIR = 'd:\RS_data\RAWIN_data'
+SKEWTLOGPDIR = rawin_utilities.BASEDIR / "SkewTlogP_big" 
 
-BASEDIR = Path(BASEDIR)
-
-SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
-
-if not SKEWTLOGPNDIR.exists():
-    os.makedirs("{}".format(str(SKEWTLOGPNDIR)))
-    print("{} is created...".format(str(SKEWTLOGPNDIR)))
-
-O_code = "47155"
-
-SKEWTLOGPNSITEDIR = BASEDIR / "SkewTlogP_image" / O_code
-
+if not SKEWTLOGPDIR.exists():
+    os.makedirs("{}".format(str(SKEWTLOGPDIR)))
+    print("{} is created...".format(str(SKEWTLOGPDIR)))
 #%%
 ###########################################
 ### Create a new figure. The dimensions here give a good aspect ratio.
@@ -121,8 +111,8 @@ plt.annotate('Created by Kiehyun.Park@gmail.com using METPY', fontsize=20,
 ###########################################################
 ###########################################################
 
-plt.savefig("{}/SKewTlogP_big(en).png".format(str(SKEWTLOGPNDIR)))
+plt.savefig("{}/SKewTlogP_big_en.png".format(str(SKEWTLOGPDIR)))
 
 #plt.show()
-#plt.close()
+plt.close()
 # %%

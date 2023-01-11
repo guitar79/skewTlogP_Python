@@ -19,7 +19,7 @@ from metpy.units import units
 
 BASEDIR = 'c:\Rdata\RAWIN_data'
 BASEDIR = 'd:\Rdata\RAWIN_data'
-#BASEDIR ='/mnt/6TB1/RS_data/RAWIN_data'
+##BASEDIR ='/mnt/6TB1/RS_data/RAWIN_data'
 BASEDIR = Path(BASEDIR)
 
 

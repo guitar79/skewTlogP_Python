@@ -59,7 +59,7 @@ fpaths = sorted(list(SONDEDIR.glob("*.csv")))
 print("fpaths: {}".format(fpaths))
 
 #%%
-for fpath in fpaths[0:1]:
+for fpath in fpaths[1:]:
     print("fpath: ", fpath)
     print("fpath.name: ", fpath.name)
     filename_el = fpath.name.split('_')
