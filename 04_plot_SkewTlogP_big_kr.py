@@ -23,6 +23,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -45,127 +46,186 @@ print ("err_log_file: {}".format(err_log_file))
 if not os.path.exists('{0}'.format(log_dir)):
     os.makedirs('{0}'.format(log_dir))
 #######################################################
-
-#%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = 'c:\RS_data\RAWIN_data'
-#BASEDIR = 'd:\RS_data\RAWIN_data'
-BASEDIR = Path(BASEDIR)
-
-SKEWTLOGPNDIR = BASEDIR / "SkewTlogP_image" 
-
-if not SKEWTLOGPNDIR.exists():
-    os.makedirs("{}".format(str(SKEWTLOGPNDIR)))
-    print("{} is created...".format(str(SKEWTLOGPNDIR)))
-
-#%%
 O_code = "47090"
+O_codes = ["47090", "47102", "47104", "47122", "47138", 
+        "47155", "47158", "47169", "47185", "47186"]
 
-RAWINDAILYDIRCODE = BASEDIR / "Daily" / O_code
-SKEWTLOGPNSITEDIR = BASEDIR / "SkewTlogP_image" / O_code
+for O_code in O_codes[5:]:
+    RAWINDAILYCODEDIR = rawin_utilities.BASEDIR / "Daily" / O_code
+    SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_big" / O_code
 
-if not SKEWTLOGPNSITEDIR.exists():
-    os.makedirs("{}".format(str(RAWINDAILYDIRCODE)))
-print("{} is created...".format(str(RAWINDAILYDIRCODE)))
-
-fpaths = sorted(list(RAWINDAILYDIRCODE.glob("*.csv")))
-print("fpaths: {}".format(fpaths))
-
+    if not SKEWTLOGPCODEDIR.exists():
+        os.makedirs("{}".format(str(SKEWTLOGPCODEDIR)))
+        print("{} is created...".format(str(SKEWTLOGPCODEDIR)))
 #%%
-for fpath in fpaths[:2]:
-    print("fpath: ", fpath)
-    print("fpath.name: ", fpath.name)
-    filename_el = fpath.name.split('_')
-    O_code = filename_el[0]
-    
-    #df = pd.read_csv(fpath, sep=',', encoding='cp949')
-    df = pd.read_csv(fpath, sep=',', skiprows=1,
-                    names = ['site', 'dt_str(UTC)', 'pressure(hPa)', 'height', 'temperature(°C)', 
-                            'dewpoint(°C)', 'winddirection(deg)', 'windspeed(knot)', 'FLAG1', 'FLAG2', 'FLAG3'], 
-                     encoding='euc-kr')
-    #df = pd.read_csv(fpath, sep=',', 
-    #                 encoding='euc-kr')
-    df = df.dropna(subset=('pressure(hPa)', 'temperature(°C)', 
-                            'dewpoint(°C)', 'winddirection(deg)', 
-                            'windspeed(knot)'), how='all'
-               ).reset_index(drop=True)
-    df = df.drop_duplicates()
-    print("df:", df)
-    print("len(df):", len(df))
+    fpaths = sorted(list(RAWINDAILYCODEDIR.glob("*.csv")))
+    print("fpaths: {}".format(fpaths))
+
     #%%
-    p = df['pressure(hPa)'].values * u.hPa
-    T = df['temperature(°C)'].values * u.degC
-    Td = df['dewpoint(°C)'].values * u.degC
-    wind_speed = df['windspeed(knot)'].values * u.knots
-    wind_dir = df['winddirection(deg)'].values * u.degrees
-    u, v = mpcalc.wind_components(wind_speed, wind_dir)
-    
-    #%%
-    # 한글 폰트 사용을 위해서 세팅
-    from matplotlib import font_manager, rc
-    font_path = "C:/Windows/Fonts/NGULIM.TTF"
-    font = font_manager.FontProperties(fname=font_path).get_name()
-    rc('font', family=font)
+    for fpath in fpaths[:]:
+        print("fpath: ", fpath)
+        print("fpath.name: ", fpath.name)
+        filename_el = fpath.name.split('_')
+        O_code = filename_el[0]
+        #%%
+        try:
+            with open(fpath) as f:
+                print("f:", f)
+                print("f.encoding:", f.encoding)
+                encoding = f.encoding
 
-    ###########################################
-    ### Create a new figure. The dimensions here give a good aspect ratio.
-    ### Skew T - log P diagram은 가로, 세로 비율이 적절해야 건조단열선, 습윤단열선의 기울기가 적절하게 그려진다.
-    ###########################################
-    fig = plt.figure(figsize=(28, 24)) 
+            df = pd.read_csv(fpath, 
+                            #encoding = encoding,
+                            encoding = "utf8",
+                            sep=',')
+            print("df:", df)
+            print("df.columns:", df.columns)
 
-    # 온도축과 기압축의 범위를 지정해 주자.
-    xxlim = [-50, 50] #온도축
-    yylim = [1050.1, 99.9] #기압축
+            df = df.dropna(subset=('pressure(hPa)', 
+                                    'temperature(°C)',
+                                    'dewpoint(°C)', 
+                                    'windspeed(knot)',
+                                    'winddirection(deg)')).reset_index(drop=True)
+            df = df.drop_duplicates()
 
-    #온도 축의 기울기를 지정한다.
-    skew = SkewT(fig, rotation=45)
+            print("df:", df)
+            print("df.columns:", df.columns)
+            print("len(df):", len(df))
 
-    skew.ax.set_title('단열선도', fontsize=42) 
-    skew.ax.set_xlabel(r'기온 (${\degree \mathrm{C}}$)', fontsize=24)
-    skew.ax.set_ylabel(r'기압 (${\mathrm{hPa}}$)', fontsize=24)
+            p = df['pressure(hPa)'].values * u.hPa
+            T = df['temperature(°C)'].values * u.degC
+            Td = df['dewpoint(°C)'].values * u.degC
+            u_wind, v_wind = mpcalc.wind_components(df['windspeed(knot)'].values * u.knots, 
+                                    np.deg2rad(df['winddirection(deg)'].values * u.deg))
+            
+            # 한글 폰트 사용을 위해서 세팅
+            from matplotlib import font_manager, rc
+            font_path = "C:/Windows/Fonts/NGULIM.TTF"
+            font = font_manager.FontProperties(fname=font_path).get_name()
+            rc('font', family=font)
 
+            ###########################################
+            ### Create a new figure. The dimensions here give a good aspect ratio.
+            ### Skew T - log P diagram은 가로, 세로 비율이 적절해야 건조단열선, 습윤단열선의 기울기가 적절하게 그려진다.
+            ###########################################
+            fig = plt.figure(figsize=(28, 24)) 
 
-    graph = rawin_utilities.draw_skewT_logP(skew)
-    # 등온선 그리는 함수
-    graph.add_isothermal()
+            # 온도축과 기압축의 범위를 지정해 주자.
+            xxlim = [-50, 50] #온도축
+            yylim = [1050.1, 99.9] #기압축
 
-    # 기압축 그리는 함수
-    graph.add_isobar()
+            # Grid for plots
+            gs = gridspec.GridSpec(4, 3)
+            skew = SkewT(fig, rotation=45, subplot=gs[:, :])
+            skew.ax.set_xlim(xxlim[0], xxlim[1])
+            skew.ax.set_ylim(yylim[0], yylim[1])
+            
+            #####################################################################
+            # 기압에 따른 기온 값을 찍어보자.
+            #####################################################################
+            # 먼저 점을 찍고
+            skew.plot(p, T,
+                    'ro', markersize = 8, fillstyle='none', 
+                    label = '기온(°C)')
+            # 실선도 추가해 주자.
+            skew.plot(p, T,
+                    'r')
+            #####################################################################
 
-    # 건조단열선 그리는 함수
-    graph.add_dry_adiabats()
+            #####################################################################
+            # 기압에 따른 이슬점 값을 찍어보자.
+            #####################################################################
+            # 먼저 점을 찍고
+            skew.plot(p, Td,
+                    'g^', markersize = 8, fillstyle='none', 
+                    label = '이슬점(°C)')
+            # 실선도 추가해 주자.
+            skew.plot(p, Td,
+                    'g', linestyle='--')
+            #####################################################################
 
-    # 습윤단열선 그리는 함수
-    graph.add_moist_adiabats()
+            #####################################################################
+            # 기압에 따른 바람을 표시해 보자.
+            #####################################################################
+            skew.plot_barbs(p, u_wind, v_wind)
+            #####################################################################
 
-    # 포화혼합비선 그리는 함수
-    graph.add_mising_ratio()
+            # Calculate LCL height and plot as black dot. Because `p`'s first value is
+            # ~1000 mb and its last value is ~250 mb, the `0` index is selected for
+            # `p`, `T`, and `Td` to lift the parcel from the surface. If `p` was inverted,
+            # i.e. start from low value, 250 mb, to a high value, 1000 mb, the `-1` index
+            # should be selected.
+            lcl_pressure, lcl_temperature = mpcalc.lcl(p[0], T[0], Td[0])
+            skew.plot(lcl_pressure, lcl_temperature, 'ko', markerfacecolor='black')
 
-    # legend 추가
-    plt.legend(loc='upper left')
+            # Calculate full parcel profile and add to plot as black line
+            prof = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
+            skew.plot(p, prof, 'k', linewidth=2)
 
-    ###########################################################
-    #####아래에 코딩을 완성하시오...
-    ###########################################################
-    # input some text for explaination.
-    plt.annotate('$ \cdotp $ LCL ( {} ): \n$ \cdotp $ LCF ( {} ):\n$ \cdotp $ EL  ( {} ): ' \
-                .format('o', 'x', 'o'), fontsize=14,
-                xy=(0, 0), xytext=(0, -12), va='top', ha='left',
-                xycoords='axes fraction', textcoords='offset points')
+            # Shade areas of CAPE and CIN
+            skew.shade_cin(p, T, prof, Td)
+            skew.shade_cape(p, T, prof)
 
-    plt.annotate('$ \cdotp $ filename :\n$ \cdotp $ time :' \
-                .format('o', 'x', 'o'), fontsize=14,
-                xy=(0, 1), xytext=(0, 32), va='top', ha='left',
-                xycoords='axes fraction', textcoords='offset points')
+            skew.ax.set_title('단열선도', fontsize=42,
+                            y = 1.05, pad = 12) 
+            skew.ax.set_xlabel(r'기온 (${\degree \mathrm{C}}$)', fontsize=24)
+            skew.ax.set_ylabel(r'기압 (${\mathrm{hPa}}$)', fontsize=24)
 
-    plt.annotate('Created by Kiehyun.Park@gmail.com using METPY', fontsize=20,
-                xy=(1, 0), xytext=(0, -50), va='top', ha='right',
-                xycoords='axes fraction', textcoords='offset points')
-    ###########################################################
-    ###########################################################
+            # Add the relevant special lines
+            skew.ax.axvline(0, label = '등온선')
+            skew.plot_dry_adiabats(label = '건조 단열선')
+            skew.plot_moist_adiabats(label = '포화 단열선')
+            skew.plot_mixing_lines(label = '포화 혼합비선')
 
-    plt.savefig("{}/SKewTlogP_big_(kr).png".format(str(SKEWTLOGPNDIR)))
+            graph = rawin_utilities.draw_skewT_logP(skew)
+            
+            # 등온선 그리는 함수
+            graph.add_isothermal()
 
-    plt.show()
-    # %%
+            # 기압축 그리는 함수
+            graph.add_isobar()
+
+            # 건조단열선 그리는 함수
+            graph.add_dry_adiabats()
+
+            # 습윤단열선 그리는 함수
+            graph.add_moist_adiabats()
+
+            # 포화혼합비선 그리는 함수
+            graph.add_mising_ratio()
+
+            # Put a legend to the right of the current axis
+            plt.legend(loc='upper left')
+
+            ###########################################################
+            # 파일 이름과 해당 날짜를 넣어 주자.
+            ###########################################################
+            # input some text for explaination.
+            plt.annotate('$ \cdotp $ LCL ( {} ): \n$ \cdotp $ LCF ( {} ):\n$ \cdotp $ EL  ( {} ): ' \
+                        .format('o', 'x', 'o'), fontsize=14,
+                        xy=(0, 0), xytext=(0, -30), va='top', ha='left',
+                        xycoords='axes fraction', textcoords='offset points')
+
+            plt.annotate('$ \cdotp $ filename : {} \n$ \cdotp $ time : {}' \
+                        .format('o', 'x', 'o'), fontsize=14,
+                        xy=(0, 1), xytext=(0, 50), va='top', ha='left',
+                        xycoords='axes fraction', textcoords='offset points')
+
+            # plt.annotate('Created by Kiehyun.Park@gmail.com using METPY', fontsize=20,
+            #             xy=(1, 0), xytext=(0, -50), va='top', ha='right',
+            #             xycoords='axes fraction', textcoords='offset points')
+            ###########################################################
+            ###########################################################
+
+            plt.savefig("{}/{}_SKewTlogP_big.png".format(str(SKEWTLOGPCODEDIR), 
+                                                            fpath.stem))
+
+            #plt.show()
+            plt.close()
+        except Exception as err :
+                print("X"*60)
+                print('{0}'.format(err))
+
+        # %%

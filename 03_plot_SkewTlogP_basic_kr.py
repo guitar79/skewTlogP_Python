@@ -46,22 +46,19 @@ print ("err_log_file: {}".format(err_log_file))
 if not os.path.exists('{0}'.format(log_dir)):
     os.makedirs('{0}'.format(log_dir))
 #######################################################
-
 #%%
 #######################################################
 # read all files in base directory for processing
-
 O_code = "47090"
 O_codes = ["47090", "47102", "47104", "47122", "47138", 
         "47155", "47158", "47169", "47185", "47186"]
-for O_code in O_codes[:]:
+for O_code in O_codes[5:]:
     RAWINDAILYCODEDIR = rawin_utilities.BASEDIR / "Daily" / O_code
     SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_basic" / O_code
 
     if not SKEWTLOGPCODEDIR.exists():
         os.makedirs("{}".format(str(SKEWTLOGPCODEDIR)))
         print("{} is created...".format(str(SKEWTLOGPCODEDIR)))
-
 
     fpaths = sorted(list(RAWINDAILYCODEDIR.glob("*.csv")))
     print("fpaths: {}".format(fpaths))

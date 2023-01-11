@@ -5,7 +5,7 @@
 
 
 """
-
+#%%
 import os
 from glob import glob
 from pathlib import Path
@@ -16,13 +16,16 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
-
+#%%
 BASEDIR = 'c:\Rdata\RAWIN_data'
 BASEDIR = 'd:\Rdata\RAWIN_data'
 ##BASEDIR ='/mnt/6TB1/RS_data/RAWIN_data'
 BASEDIR = Path(BASEDIR)
 
+OBSDIC = {"47090":"속초", "47102":"백령도", "47104":"북강릉", "47122":"오산", "47138":"포항", 
+        "47155":"창원", "47158":"광주", "47169":"흑산도", "47185":"고산", "47186":"국가태풍센터"}
 
+#%%
 class draw_skewT_logP():
     def __init__(self, skewed_graph):
         self.skew = skewed_graph
