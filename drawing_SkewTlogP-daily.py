@@ -30,7 +30,7 @@ import metpy.calc as mpcalc
 from metpy.units import units as u
 
 import Python_utilities
-import rawin_utilities
+import _rawin_utilities
 
 from metpy.plots import SkewT
 
@@ -101,7 +101,7 @@ skew.ax.set_title('Skew T Adiabatic Diagram\n', fontsize=42)
 skew.ax.set_xlabel(r'temperature (${\degree \mathrm{C}}$)', fontsize=24)
 skew.ax.set_ylabel(r'pressure (${\mathrm{hPa}}$)', fontsize=24)
 
-graph = rawin_utilities.draw_skewT_logP(skew)
+graph = _rawin_utilities.draw_skewT_logP(skew)
 # 등온선 그리는 함수
 graph.add_isothermal()
 

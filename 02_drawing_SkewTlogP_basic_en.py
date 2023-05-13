@@ -28,7 +28,7 @@ import metpy.calc as mpcalc
 from metpy.units import units as u
 
 import Python_utilities
-import rawin_utilities
+import _rawin_utilities
 
 from metpy.plots import SkewT
 
@@ -47,7 +47,7 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-SKEWTLOGPDIR = rawin_utilities.BASEDIR / "SkewTlogP_basic" 
+SKEWTLOGPDIR = _rawin_utilities.BASEDIR / "SkewTlogP_basic" 
 
 if not SKEWTLOGPDIR.exists():
     os.makedirs("{}".format(str(SKEWTLOGPDIR)))

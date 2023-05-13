@@ -31,7 +31,7 @@ import metpy.calc as mpcalc
 from metpy.units import units as u
 
 import Python_utilities
-import rawin_utilities
+import _rawin_utilities
 
 from metpy.plots import SkewT
 
@@ -53,8 +53,8 @@ O_codes = ["47090", "47102", "47104", "47122", "47138",
         "47155", "47158", "47169", "47185", "47186"]
 
 for O_code in O_codes[5:]:
-    RAWINDAILYCODEDIR = rawin_utilities.BASEDIR / "Daily" / O_code
-    SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_big" / O_code
+    RAWINDAILYCODEDIR = _rawin_utilities.BASEDIR / "Daily" / O_code
+    SKEWTLOGPCODEDIR = _rawin_utilities.BASEDIR / "SkewTlogP_big" / O_code
 
     if not SKEWTLOGPCODEDIR.exists():
         os.makedirs("{}".format(str(SKEWTLOGPCODEDIR)))
@@ -179,7 +179,7 @@ for O_code in O_codes[5:]:
             skew.plot_moist_adiabats(label = '포화 단열선')
             skew.plot_mixing_lines(label = '포화 혼합비선')
 
-            graph = rawin_utilities.draw_skewT_logP(skew)
+            graph = _rawin_utilities.draw_skewT_logP(skew)
             
             # 등온선 그리는 함수
             graph.add_isothermal()

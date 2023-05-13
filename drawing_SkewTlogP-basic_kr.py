@@ -28,7 +28,7 @@ import metpy.calc as mpcalc
 from metpy.units import units as u
 
 import Python_utilities
-import rawin_utilities
+import _rawin_utilities
 
 from metpy.plots import SkewT
 

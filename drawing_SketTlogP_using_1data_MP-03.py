@@ -20,7 +20,7 @@ conda install -c conda-forge metpy
 
 from glob import glob
 import os
-import rawin_utilities
+import _rawin_utilities
 
 add_log = True
 if add_log == True :
@@ -85,7 +85,7 @@ for dir_names in sorted(os.listdir(base_dr)):
             for fullname in fullnames[batch*num_cpu:(batch+1)*num_cpu] :
                 print('filename.\n {0}'.format(fullname))
                 #myMP.run(f, fullname)
-                myMP.run(rawin_utilities.drawing_SkewT_logP_using1data, fullname, base_dr, dir_name)
+                myMP.run(_rawin_utilities.drawing_SkewT_logP_using1data, fullname, base_dr, dir_name)
             print("Batch " + str(batch))
             myMP.wait()
             #values.append(myMP.wait())

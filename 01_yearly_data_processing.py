@@ -28,7 +28,7 @@ from dateutil.relativedelta import relativedelta
 import metpy.calc as mpcalc
 from metpy.units import units as u
 
-import rawin_utilities
+import _rawin_utilities
 import Python_utilities
 
 
@@ -47,7 +47,7 @@ if not os.path.exists('{0}'.format(log_dir)):
 #%%
 #######################################################
 # read all files in base directory for processing
-BASEDIR = Path(rawin_utilities.BASEDIR)
+BASEDIR = Path(_rawin_utilities.BASEDIR)
 
 SONDEDIR = BASEDIR / "UPPER_Sonde"
 if not SONDEDIR.exists():

@@ -20,7 +20,7 @@ conda install -c conda-forge metpy
 
 from glob import glob
 import os
-import rawin_utilities
+import _rawin_utilities
 
 log_dir = "logs/"
 log_file = "{}{}.log".format(log_dir, os.path.basename(__file__)[:-3])
@@ -38,4 +38,4 @@ for dir_names in sorted(os.listdir(base_dr)):
         
         for fullname in fullnames :
             print('filename.\n {0}'.format(fullname))
-            rawin_utilities.drawing_SkewT_logP_using1data(fullname, base_dr, dir_name)
+            _rawin_utilities.drawing_SkewT_logP_using1data(fullname, base_dr, dir_name)

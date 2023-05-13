@@ -31,7 +31,7 @@ import metpy.calc as mpcalc
 from metpy.units import units as u
 
 import Python_utilities
-import rawin_utilities
+import _rawin_utilities
 
 from metpy.plots import Hodograph, SkewT
 
@@ -55,8 +55,8 @@ O_code = "47090"
 O_codes = ["47090", "47102", "47104", "47122", "47138", 
         "47155", "47158", "47169", "47185", "47186"]
 for O_code in O_codes[5:]:
-    RAWINDAILYCODEDIR = rawin_utilities.BASEDIR / "Daily" / O_code
-    SKEWTLOGPCODEDIR = rawin_utilities.BASEDIR / "SkewTlogP_basic_Hodo" / O_code
+    RAWINDAILYCODEDIR = _rawin_utilities.BASEDIR / "Daily" / O_code
+    SKEWTLOGPCODEDIR = _rawin_utilities.BASEDIR / "SkewTlogP_basic_Hodo" / O_code
 
     if not SKEWTLOGPCODEDIR.exists():
         os.makedirs("{}".format(str(SKEWTLOGPCODEDIR)))
